@@ -1,0 +1,40 @@
+<ScreenButton@Button>:
+    size_hint: [0.5, 0.10]
+
+<AuthorScreen>:
+    BoxLayout:
+        ScreenButton:
+            text: "Author Screen"
+
+<LevelScreen>:
+    BoxLayout:
+        ScreenButton:
+            text: "Level Screen"
+
+<SettingsScreen>:
+    BoxLayout:
+        ScreenButton:
+            text: "Settings Screen"
+
+
+<MenuScreen@Screen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: '40dp'
+        padding: ['40dp', '20dp', '20dp', '40dp']
+
+        ScreenButton:
+            text: "Play"
+            on_press: root.change_to('play')
+
+        ScreenButton:
+            text: "Settings"
+
+        ScreenButton:
+            text: "Levels"
+
+        ScreenButton:
+            text: "Author"
+
+        ScreenButton:
+            text: "Exit"
