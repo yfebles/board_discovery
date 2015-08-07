@@ -1,0 +1,15 @@
+.idea/.name
+.idea/dictionaries/y_febles.xml
+.idea/encodings.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/kivy projects.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/vcs.xml
+.idea/workspace.xml
+screens/AuthorScreen.pyc
+screens/LevelsScreen.pyc
+screens/MenuScreen.pyc
+screens/SettingsScreen.pyc

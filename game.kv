@@ -5,9 +5,11 @@
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
 
-<AuthorScreen>:
+<AuthorScreen@GameAuxScreen>:
     BoxLayout:
         orientation: 'vertical'
+        spacing: '40dp'
+
         ScreenButton:
             text: "Author Screen"
 
@@ -16,6 +18,7 @@
 <LevelsScreen>:
     BoxLayout:
         orientation: 'vertical'
+        spacing: '40dp'
         ScreenButton:
             text: "Level Screen"
 
@@ -24,8 +27,9 @@
 <SettingsScreen>:
     BoxLayout:
         orientation: 'vertical'
+        spacing: '40dp'
         ScreenButton:
-            text: "Settings Screen"
+            text: str(app.settings['music'])
 
         BackToMenuButton
 
@@ -33,22 +37,23 @@
     BoxLayout:
         orientation: 'vertical'
         spacing: '40dp'
-        padding: ['40dp', '20dp', '20dp', '40dp']
+        size_hint: [1,1]
+
 
         ScreenButton:
             text: "Play"
 
         ScreenButton:
             text: "Settings"
-            on_press: root.manager.current = 'settings'
+            on_press: app.screen_manager.current = 'settings'
 
         ScreenButton:
             text: "Levels"
-            on_press: root.manager.current = 'levels'
+            on_press: app.screen_manager.current = 'levels'
 
         ScreenButton:
             text: "Author"
-            on_press: root.manager.current = 'author'
+            on_press: app.screen_manager.current = 'author'
 
         ScreenButton:
             text: "Exit"
