@@ -5,7 +5,38 @@
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
 
-<AuthorScreen@GameAuxScreen>:
+<PlayScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: '40dp'
+
+        GridLayout:
+            rows: 2
+
+            Button:
+                text: "Close"
+            Button:
+                text: ""
+
+            Label:
+                text: "Points"
+            Label:
+                  text: "0"
+            Label:
+                text: "Hints"
+            Label:
+                  text: "0"
+            Label:
+                text: "Lives"
+            Label:
+                  text: "0"
+            Label:
+                text: "time
+
+        Board
+        BackToMenuButton
+
+<AuthorScreen>:
     BoxLayout:
         orientation: 'vertical'
         spacing: '40dp'
@@ -28,9 +59,6 @@
     BoxLayout:
         orientation: 'vertical'
         spacing: '40dp'
-        ScreenButton:
-            text: str(app.settings['music'])
-
         BackToMenuButton
 
 <MenuScreen>:
@@ -39,9 +67,10 @@
         spacing: '40dp'
         size_hint: [1,1]
 
-
         ScreenButton:
             text: "Play"
+            on_press: app.screen_manager.current = 'play'
+
 
         ScreenButton:
             text: "Settings"

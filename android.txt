@@ -1,0 +1,3 @@
+title= Board
+author=Yasel Febles Torres
+orientation=portrait
