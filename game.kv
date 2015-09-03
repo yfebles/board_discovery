@@ -1,39 +1,41 @@
-<ScreenButton@Button>:
-    size_hint: [0.5, 0.10]
-
-<BackToMenuButton@ScreenButton>:
+<BackToMenuButton@Button>:
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
 
 <PlayScreen>:
     BoxLayout:
+        id: play_screen
         orientation: 'vertical'
         spacing: '40dp'
 
         GridLayout:
             rows: 2
-
+            size_hint: [1, 0.2]
             Button:
                 text: "Close"
-            Button:
-                text: ""
+                on_press: app.screen_manager.current = 'menu'
 
             Label:
                 text: "Points"
             Label:
-                  text: "0"
+                text: "Lives"
             Label:
                 text: "Hints"
             Label:
-                  text: "0"
+                text: ""
             Label:
-                text: "Lives"
+                id: points_lbl
+                text: "0"
             Label:
-                  text: "0"
+                id: lives_lbl
+                text: "2"
             Label:
-                text: "time
+                id: hints_lbl
+                text: "0"
 
-        Board
+        Board:
+            center: play_screen.center
+
         BackToMenuButton
 
 <AuthorScreen>:
@@ -41,49 +43,61 @@
         orientation: 'vertical'
         spacing: '40dp'
 
-        ScreenButton:
+        Button:
             text: "Author Screen"
 
         BackToMenuButton
 
 <LevelsScreen>:
+    id: levels_screen
+
     BoxLayout:
         orientation: 'vertical'
-        spacing: '40dp'
-        ScreenButton:
+        spacing: self.height * 0.1
+        size_hint: [0.8, 0.2]
+        pos: levels_screen.width * 0.1, levels_screen.height * 0.1
+
+        Button:
             text: "Level Screen"
 
         BackToMenuButton
 
 <SettingsScreen>:
+    id: settings_screen
+
     BoxLayout:
         orientation: 'vertical'
-        spacing: '40dp'
+        spacing: self.height * 0.1
+        size_hint: [0.8, 0.2]
+        pos: settings_screen.width * 0.1, settings_screen.height * 0.1
+
         BackToMenuButton
 
 <MenuScreen>:
+    id: menu_screen
+
     BoxLayout:
         orientation: 'vertical'
-        spacing: '40dp'
-        size_hint: [1,1]
+        spacing: self.height * 0.1
+        size_hint: [0.5, 0.8]
+        pos: menu_screen.width * 0.25, menu_screen.height * 0.1
 
-        ScreenButton:
+        Button:
             text: "Play"
             on_press: app.screen_manager.current = 'play'
 
-
-        ScreenButton:
+        Button:
             text: "Settings"
             on_press: app.screen_manager.current = 'settings'
 
-        ScreenButton:
+        Button:
             text: "Levels"
             on_press: app.screen_manager.current = 'levels'
 
-        ScreenButton:
+        Button:
             text: "Author"
             on_press: app.screen_manager.current = 'author'
 
-        ScreenButton:
+        Button:
             text: "Exit"
             on_press: app.stop()
