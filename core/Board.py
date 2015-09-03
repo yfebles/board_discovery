@@ -23,9 +23,7 @@ class Board(GridLayout, EventDispatcher):
         GridLayout.__init__(self, **kwargs)
         EventDispatcher.__init__(self, **kwargs)
 
-        self.spacing = 2
         self.cols = columns
-        self.size_hint = [0.95, 0.95]
 
         self.board = [[BoardCell(i, j)
                        for j in xrange(self.cols)]

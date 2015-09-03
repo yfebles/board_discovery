@@ -6,8 +6,12 @@ from utils import *
 
 class GameApp(App):
 
+    KV_FILE_PATH = "assets\\kv_files\\menu_screen.kv"
+
     def __init__(self, *args, **kwargs):
         super(GameApp, self).__init__(*args, **kwargs)
+
+        self.load_kv(self.KV_FILE_PATH)
 
         # set the transition manager between screens
         self.screen_manager = ScreenManager()

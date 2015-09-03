@@ -1,0 +1,15 @@
+#:include assets\\kv_files\\back_to_menu_button.kv
+
+<AuthorScreen>:
+    id: author_screen
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: self.height * 0.1
+        size_hint: [0.8, 0.2]
+        pos: author_screen.width * 0.1, author_screen.height * 0.1
+
+        Button:
+            text: "Author Screen"
+
+        BackToMenuButton
