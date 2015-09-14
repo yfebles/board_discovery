@@ -2,6 +2,9 @@
 
 <PlayScreen>:
     id: play_screen
+    points_lbl: points_label_id
+    lives_lbl: lives_label_id
+    hints_lbl: hints_label_id
 
     BoxLayout:
         orientation: 'vertical'
@@ -24,13 +27,13 @@
             Label:
                 text: ""
             Label:
-                id: points_lbl
+                id: points_label_id
                 text: "0"
             Label:
-                id: lives_lbl
+                id: lives_label_id
                 text: "2"
             Label:
-                id: hints_lbl
+                id: hints_label_id
                 text: "0"
 
         Board:
@@ -39,4 +42,6 @@
             width: min(self.parent.width, self.parent.height)
             pos: self.parent.width * 0.025, self.parent.height * 0.025
 
-        BackToMenuButton
+        BackToMenuButton:
+            size_hint: [0.4, 0.2]
+            pos: self.parent.width * 0.3, self.parent.height * 0.4

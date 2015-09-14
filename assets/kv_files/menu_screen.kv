@@ -13,22 +13,22 @@
         size_hint: [0.5, 0.8]
         pos: menu_screen.width * 0.25, menu_screen.height * 0.1
 
-        Button:
+        RoundedButton:
             text: "Play"
             on_press: app.screen_manager.current = 'play'
 
-        Button:
+        RoundedButton:
             text: "Settings"
             on_press: app.screen_manager.current = 'settings'
 
-        Button:
+        RoundedButton:
             text: "Levels"
             on_press: app.screen_manager.current = 'levels'
 
-        Button:
+        RoundedButton:
             text: "Author"
             on_press: app.screen_manager.current = 'author'
 
-        Button:
+        RoundedButton:
             text: "Exit"
             on_press: app.stop()

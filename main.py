@@ -1,5 +1,5 @@
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, NoTransition
+from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from screens import *
 from utils import *
 
@@ -15,7 +15,7 @@ class GameApp(App):
 
         # set the transition manager between screens
         self.screen_manager = ScreenManager()
-        self.screen_manager.transition = NoTransition()
+        self.screen_manager.transition = FadeTransition()
 
     def build(self):
 

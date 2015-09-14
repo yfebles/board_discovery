@@ -10,7 +10,7 @@ class Board(GridLayout, EventDispatcher):
 
     # region SIGNALS
 
-    # method called when the game has end raise True if win or False if lose
+    # method called when the game has end. Raise True if win or False if lose
     game_end_result_callback = None
 
     # callback called when the user-board interaction
@@ -24,19 +24,17 @@ class Board(GridLayout, EventDispatcher):
         EventDispatcher.__init__(self, **kwargs)
 
         self.cols = columns
+        self.board = [[]]
 
-        self.board = [[BoardCell(i, j)
+    def load_level(self, level):
+        self.board = [[BoardCell(i, j, None)
                        for j in xrange(self.cols)]
                       for i in xrange(self.cols)]
 
         for i in xrange(self.cols):
             for j in xrange(self.cols):
                 self.add_widget(self.board[i][j])
-                print(i, j)
-                self.board[i][j].bind(on_press=self.change_next_ones)
-
-    def load_level(self, level):
-        pass
+                self.board[i][j].bind(on_press=self.cell_pressed)
 
     def end_game(self):
         pass
@@ -47,7 +45,7 @@ class Board(GridLayout, EventDispatcher):
     def pause_game(self):
         pass
 
-    def change_next_ones(self, button):
+    def cell_pressed(self, button):
 
         i, j = button.i, button.j
 

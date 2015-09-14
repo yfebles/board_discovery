@@ -1,3 +1,8 @@
-<BackToMenuButton@Button>:
+<RoundedButton@Button>:
+    background_normal: 'assets\\images\\normal.png'
+    background_down: 'assets\\images\\down.png'
+    border: [30,30,30,30]
+
+<BackToMenuButton@RoundedButton>:
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'

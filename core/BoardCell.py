@@ -14,9 +14,22 @@ class BoardCell(Button):
 
     # background_img = ImageProperty(None)
 
-    def __init__(self, i, j, **kwargs):
+    def __init__(self, row, col, level_item=None, **kwargs):
+        """
+        :param row: the row of the bard cell at the board
+        :param col: the col of the bard cell at the board
+        :param level_item: the inside level item that this widget wrap up
+        :param kwargs: other buttons params
+        :return:
+        """
         Button.__init__(self, **kwargs)
 
-        self.i, self.j = i, j
+        if level_item is not None:
+            self.level_item = level_item
+            self.active = self.level_item.active
 
-        self.text = str(i*j + 1)
+            self.visible = self.level_item.visible
+
+        self.i, self.j = row, col
+
+        self.text = str(row*col + 1)
