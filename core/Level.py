@@ -21,12 +21,13 @@ class Level:
         if items is None or not isinstance(items, list):
             self.items = []
 
-        self.items = [LevelItem(item["image"], item["name"], item["visible"], item["unlocked_times"], item["hints"])
-                      for item in items]
+        if items is not None:
+            self.items = [LevelItem(item["image"], item["name"], item["visible"], item["unlocked_times"], item["hints"])
+                          for item in items]
 
-        self.relations = relations
-        if self.relations is None:
-            self.relations = [[None for _ in self.items] for _ in self.items]
+        self.relations = [[]]
+        if self.relations is not None:
+            self.relations = relations
 
         elif len(relations) != len(items) * len(items):
             raise Exception("Relations must be a square matrix of size {0}".format(len(items) * len(items)))
@@ -60,6 +61,11 @@ class Level:
 
         return self.relations[i][j]
 
+    def clone(self):
+        copy_level = Level(self.name, self.time_seg, self.points, items=None, relations=self.relations)
+        copy_level.items = [i.clone() for i in self.items]
+        return copy_level
+
     @staticmethod
     def from_json(json_data):
         """
@@ -80,3 +86,9 @@ class Level:
         relations = json_data["relations"]
 
         return Level(name, time, points, items, relations)
+
+    def __str__(self):
+        return self.name + " points: " + str(self.points) + " time: " + \
+            str(self.time_seg) + " items: " + str(self.items) + " relations: " + str(self.relations)
+
+

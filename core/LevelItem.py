@@ -1,4 +1,3 @@
-__author__ = 'y.febles'
 
 
 class LevelItem:
@@ -16,8 +15,11 @@ class LevelItem:
 
         self.name = name
         self.visible = visible
-        self.image_path = image
+        self.image = image
         self.unlocked_times = unlocked_times
+
+    def clone(self):
+        return LevelItem(self.image, self.name, self.visible, self.unlocked_times, self.hints)
 
     @property
     def active(self):

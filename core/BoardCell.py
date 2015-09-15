@@ -7,13 +7,6 @@ class BoardCell(Button):
     A board cell
     """
 
-    # If the cell is available to be used.
-    active = BooleanProperty(True)
-
-    visible = BooleanProperty(True)
-
-    # background_img = ImageProperty(None)
-
     def __init__(self, row, col, level_item=None, **kwargs):
         """
         :param row: the row of the bard cell at the board
@@ -24,12 +17,14 @@ class BoardCell(Button):
         """
         Button.__init__(self, **kwargs)
 
-        if level_item is not None:
-            self.level_item = level_item
-            self.active = self.level_item.active
-
-            self.visible = self.level_item.visible
-
         self.i, self.j = row, col
 
         self.text = str(row*col + 1)
+
+        if level_item is not None:
+            self.level_item = level_item
+
+            self.text = level_item.name
+            self.active = self.level_item.active
+            self.visible = self.level_item.visible
+

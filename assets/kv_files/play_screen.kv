@@ -5,6 +5,7 @@
     points_lbl: points_label_id
     lives_lbl: lives_label_id
     hints_lbl: hints_label_id
+    board: board_widget_id
 
     BoxLayout:
         orientation: 'vertical'
@@ -37,6 +38,7 @@
                 text: "0"
 
         Board:
+            id: board_widget_id
             spacing: self.width * 0.01
             size_hint: [0.95, 0.95]
             width: min(self.parent.width, self.parent.height)

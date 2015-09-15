@@ -6,15 +6,16 @@
     BoxLayout:
         orientation: 'vertical'
         spacing: self.height * 0.1
-        size_hint: [0.8, 1]
+        size_hint: [0.8, 0.8]
         pos: author_screen.width * 0.1, author_screen.height * 0.1
 
         Image:
+            width: 200
             source: 'assets\\images\\logo.png'
 
         Label:
             markup: True
-            text: "GiftyGames 2015. \nAll rights reserved. \n\n "+ "get more GiftyGames on [color=#9999cc] http://play.google.com/giftygame.[/color]"
+            text: "GiftyGames 2015. \nAll rights reserved. \n "+ "get more GiftyGames on [color=#9999cc] http://play.google.com/giftygame.[/color]"
 
         BackToMenuButton:
             spacing: self.width * 0.1

@@ -1,3 +1,3 @@
-title= Board
-author=Yasel Febles Torres
+title= BoardDiscovery
+author= GiftyGames
 orientation=portrait
