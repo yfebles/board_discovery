@@ -1,7 +1,9 @@
-from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, FadeTransition
-from core.LevelItem import LevelItem
 from screens import *
+from kivy.app import App
+from levels.Level import Level
+from levels.LevelItem import LevelItem
+from kivy.storage.jsonstore import JsonStore
+from kivy.uix.screenmanager import ScreenManager, FadeTransition
 
 
 class GameApp(App):

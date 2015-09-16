@@ -7,6 +7,9 @@ class BoardCell(Button):
     A board cell
     """
 
+    NORMAL_BACKGROUND = 'assets\\images\\normal.png'
+    SELECTED_BACKGROUND = 'assets\\images\\down.png'
+
     def __init__(self, row, col, level_item=None, **kwargs):
         """
         :param row: the row of the bard cell at the board
@@ -17,14 +20,46 @@ class BoardCell(Button):
         """
         Button.__init__(self, **kwargs)
 
-        self.i, self.j = row, col
+        self.row, self.col = row, col
 
-        self.text = str(row*col + 1)
+        # the visibility state of the cell
+        self._visible = False
+
+        # the selection state of the cell
+        self._selected = False
+
+        self.item_text = ""
 
         if level_item is not None:
             self.level_item = level_item
 
-            self.text = level_item.name
+            self.item_text = level_item.name
             self.active = self.level_item.active
             self.visible = self.level_item.visible
 
+        self.border = [30, 30, 30, 30]
+
+    @property
+    def visible(self):
+        return self._visible
+
+    @visible.setter
+    def visible(self, value):
+        self._visible = value
+
+        self.text = self.item_text if value else ""
+        self.background_normal = self.NORMAL_BACKGROUND if value else ''
+
+        if self.selected and not value:
+            self.selected = value
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value):
+
+        self._selected = value
+
+        self.background_normal = self.SELECTED_BACKGROUND if value else self.NORMAL_BACKGROUND

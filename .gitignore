@@ -13,3 +13,13 @@ screens/AuthorScreen.pyc
 screens/LevelsScreen.pyc
 screens/MenuScreen.pyc
 screens/SettingsScreen.pyc
+core/Board.pyc
+core/Board.pyc
+core/Board.pyc
+core/BoardCell.pyc
+core/Level.pyc
+core/LevelItem.pyc
+screens/PlayScreen.pyc
+utils.pyc
+*.pyc
+*.pyc

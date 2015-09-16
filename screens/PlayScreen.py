@@ -1,9 +1,6 @@
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
-from kivy.storage.jsonstore import JsonStore
-from core.Level import Level
 from core.Board import Board
-
 
 class PlayScreen(Screen):
 
@@ -49,8 +46,7 @@ class PlayScreen(Screen):
         # save the user points for the level
 
         if game_win:
-            points = int(self.points_lbl.text)
-            self.db["score"].append(points)
+            print("game wined")
             self.dispatch("on_game_ended")
             return
 
