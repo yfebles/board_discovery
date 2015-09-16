@@ -134,11 +134,14 @@ class Board(GridLayout, EventDispatcher):
         if i < self.cols - 1:
             adjacent_cells.append((i + 1, j))
 
-        # if j > 0:
-        #     adjacent_cells.append((i, j - 1))
-        #
-        # if j < self.cols - 1:
-        #     adjacent_cells.append((i, j + 1))
+        if j > 0:
+            adjacent_cells.append((i, j - 1))
+
+        if j < self.cols - 1:
+            adjacent_cells.append((i, j + 1))
 
         for cell in adjacent_cells:
-            self.board[cell[0]][cell[1]].visible = True
+            if not self.board[cell[0]][cell[1]].visible:
+                self.board[cell[0]][cell[1]].visible = True
+                self.dispatch("on_points_made" ,self.level.points)
+                return
