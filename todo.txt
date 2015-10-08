@@ -1,0 +1,8 @@
+* Logic de pasar los niveles
+* Vista de niveles (bloqueados etc)
+
+* Configuration handling
+* handle effects and sounds
+
+* levels creation
+* db implementation for store levels

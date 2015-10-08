@@ -1,4 +1,5 @@
 from kivy.properties import BooleanProperty
+import os
 from kivy.uix.button import Button
 
 
@@ -7,8 +8,9 @@ class BoardCell(Button):
     A board cell
     """
 
-    NORMAL_BACKGROUND = 'assets\\images\\normal.png'
-    SELECTED_BACKGROUND = 'assets\\images\\down.png'
+    IMG_PATH = os.path.join('assets', 'images', 'items')
+    NORMAL_BACKGROUND = os.path.join('assets', 'images', 'normal.png')
+    SELECTED_BACKGROUND = os.path.join('assets', 'images', 'down.png')
 
     def __init__(self, row, col, level_item=None, **kwargs):
         """
@@ -36,6 +38,9 @@ class BoardCell(Button):
             self.item_text = level_item.name
             self.active = self.level_item.active
             self.visible = self.level_item.visible
+
+            if self.level_item.image:
+                self.background_normal = os.path.join(self.IMG_PATH, self.level_item.image)
 
         self.border = [30, 30, 30, 30]
 

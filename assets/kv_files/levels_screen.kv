@@ -1,15 +1,30 @@
 #:include assets\\kv_files\\back_to_menu_button.kv
 
 <LevelsScreen>:
-    id: levels_screen
+    levels_grid: levels_grid_id
 
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: self.height * 0.1
-        size_hint: [0.8, 0.2]
-        pos: levels_screen.width * 0.1, levels_screen.height * 0.1
+    FloatLayout:
+        size_hint: [1, 1]
 
-        Button:
-            text: "Level Screen"
+        # set a back image
+        canvas.before:
+            Rectangle:
+                pos: 0, 0
+                size: self.width, self.height
 
-        BackToMenuButton
+                Image:
+                    source: 'assets\\images\\normal.png'
+
+        ScrollView:
+            size_hint: [0.9, 0.9]
+            pos: self.parent.width * 0.05, self.parent.height * 0.05
+
+            GridLayout:
+                id: levels_grid_id
+                cols: 3
+                size_hint: [0.9, None]
+                pos: self.parent.width * 0.05, self.parent.height * 0.05
+
+        BackToMenuButton:
+            size_hint: [0.1, 0.1]
+            pos: self.parent.width * 0.1, self.parent.height * 0.1

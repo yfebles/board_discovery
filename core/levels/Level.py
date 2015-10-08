@@ -1,4 +1,4 @@
-from levels import LevelItem
+from core.levels import LevelItem
 
 
 class Level:
