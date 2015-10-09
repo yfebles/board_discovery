@@ -62,7 +62,7 @@ class Level:
         return self.relations[i][j]
 
     def clone(self):
-        copy_level = Level(self.name, self.time_seg, self.points, items=None, relations=self.relations)
+        copy_level = Level(self.name, self.time_seg, self.points,   items=None, relations=self.relations)
         copy_level.items = [i.clone() for i in self.items]
         return copy_level
 

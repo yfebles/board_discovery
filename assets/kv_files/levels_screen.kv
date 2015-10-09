@@ -1,4 +1,4 @@
-#:include assets\\kv_files\\back_to_menu_button.kv
+#:include assets\kv_files\utils.kv
 
 <LevelsScreen>:
     levels_grid: levels_grid_id
@@ -11,9 +11,8 @@
             Rectangle:
                 pos: 0, 0
                 size: self.width, self.height
+                source: 'assets\\images\\level_back.jpg'
 
-                Image:
-                    source: 'assets\\images\\normal.png'
 
         ScrollView:
             size_hint: [0.9, 0.9]
@@ -22,8 +21,8 @@
             GridLayout:
                 id: levels_grid_id
                 cols: 3
-                size_hint: [0.9, None]
-                pos: self.parent.width * 0.05, self.parent.height * 0.05
+                size_hint: [1, None]
+
 
         BackToMenuButton:
             size_hint: [0.1, 0.1]

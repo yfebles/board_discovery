@@ -1,4 +1,4 @@
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, Clock
 from kivy.uix.screenmanager import Screen
 from math import sqrt
 from core.BoardCell import BoardCell
@@ -10,11 +10,12 @@ class PlayScreen(Screen):
 
     # region WIDGETS
 
-    points_lbl = ObjectProperty()
-    # lives_lbl = ObjectProperty()
-    hints_lbl = ObjectProperty()
     board_widget = ObjectProperty()
+    # lives_lbl = ObjectProperty()
+    points_lbl = ObjectProperty()
+    hints_lbl = ObjectProperty()
     time_lbl = ObjectProperty()
+
     # endregion
 
     def __init__(self, *args, **kwargs):
@@ -28,6 +29,8 @@ class PlayScreen(Screen):
         self.level_manager = LevelManager()
 
         self.app_configs = Config()
+
+        self.game_paused = False
 
         self.board_widget.cols = 3
         self.board = [[]]
@@ -104,7 +107,7 @@ class PlayScreen(Screen):
 
                 self.board[i][j].visible = True
 
-                self.update_points(self.current_level.points)
+                self.points += self.current_level.points
 
                 # just one cell discovered
                 return
@@ -141,9 +144,9 @@ class PlayScreen(Screen):
         self.current_level = level.clone()
 
         # self.lives_lbl.text = "3"
-        self.hints_lbl.text = "3"
-        self.points_lbl.text = "0"
-
+        self.hints = 3
+        self.points = 0
+        self.time_sec = 10
         self.board_widget.clear_widgets()
 
         cols = self.board_widget.cols
@@ -161,20 +164,24 @@ class PlayScreen(Screen):
 
                 self.board[i][j].bind(on_press=self.cell_pressed)
 
+        self.resume_game()
+
     def pause_game(self):
         pass
 
     def resume_game(self):
-        pass
+        self.game_paused = False
 
-    def on_game_ended(self):
+        Clock.schedule_interval(self.update_time, 1)
+
+    def on_game_ended(self, game_win):
         """
         event raised when the game has end in this level
         :return:
         """
         pass
 
-    def game_end(self, board, game_win):
+    def game_end(self, game_win):
         # save the user points for the level
 
         if game_win:
@@ -182,30 +189,69 @@ class PlayScreen(Screen):
 
             self.level_manager.save_level_points(self.points)
 
-
-            self.dispatch("on_game_ended")
+            self.dispatch("on_game_ended", True)
             return
 
         # ask for repeat level if lose
-        repeat_level = True
+        repeat_level = False
 
         if repeat_level:
             # if true reload level
             self.load_level(self.current_level)
         else:
-            self.dispatch("on_game_ended")
+            self.dispatch("on_game_ended", True)
 
     # endregion
+
+    # region Properties
 
     @property
     def points(self):
         return int(self.points_lbl.text)
 
-    def update_points(self, points):
-        current_points = int(self.points_lbl.text)
+    @points.setter
+    def points(self, points):
+        self.points_lbl.text = str(points)
 
-        self.points_lbl.text = str(current_points + points)
+    @property
+    def hints(self):
+        return int(self.hints_lbl.text)
 
-    def update_time(self):
-        pass
+    @hints.setter
+    def hints(self, hints_count):
+        self.hints_lbl.text = str(hints_count)
 
+    @property
+    def time_sec(self):
+        # time label in format "00:00" min:sec
+        time = self.time_lbl.text
+
+        time_s = int(time[0:2]) * 60 + int(time[3:])
+
+        return time_s
+
+    @time_sec.setter
+    def time_sec(self, time_sec_count):
+        # time label in format "00:00" min:sec
+        minutes = time_sec_count / 60
+        seconds = time_sec_count % 60
+
+        minutes_str = str(minutes) if minutes >= 10 else "0" + str(minutes)
+        seconds_str = str(seconds) if seconds >= 10 else "0" + str(seconds)
+
+        self.time_lbl.text = minutes_str + ":" + str(seconds_str)
+
+    # endregion
+
+    def update_time(self, dt):
+        current_time = self.time_sec
+
+        if current_time > 0:
+            current_time -= 1
+
+        self.time_sec = current_time
+
+        if current_time == 0:
+            self.game_end(False)
+
+        return current_time > 0

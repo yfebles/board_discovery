@@ -6,3 +6,7 @@
 <BackToMenuButton@RoundedButton>:
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
+
+# a label that adjust the text inside it
+<AdjustableLabel@Label>:
+    text_size: self.parent.width, None

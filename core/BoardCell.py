@@ -1,5 +1,5 @@
-from kivy.properties import BooleanProperty
 import os
+from kivy.graphics.vertex_instructions import Rectangle
 from kivy.uix.button import Button
 
 
@@ -39,11 +39,6 @@ class BoardCell(Button):
             self.active = self.level_item.active
             self.visible = self.level_item.visible
 
-            if self.level_item.image:
-                self.background_normal = os.path.join(self.IMG_PATH, self.level_item.image)
-
-        self.border = [30, 30, 30, 30]
-
     @property
     def visible(self):
         return self._visible
@@ -53,7 +48,7 @@ class BoardCell(Button):
         self._visible = value
 
         self.text = self.item_text if value else ""
-        self.background_normal = self.NORMAL_BACKGROUND if value else ''
+        # self.background_normal = self.NORMAL_BACKGROUND if value else ''
 
         if self.selected and not value:
             self.selected = value
@@ -67,4 +62,8 @@ class BoardCell(Button):
 
         self._selected = value
 
-        self.background_normal = self.SELECTED_BACKGROUND if value else self.NORMAL_BACKGROUND
+        if value:
+            with self.canvas:
+                Rectangle(source="assets\\image\\question.png")
+            print("canvas")
+

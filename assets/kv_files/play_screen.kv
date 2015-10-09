@@ -1,6 +1,7 @@
-#:include assets\\kv_files\\back_to_menu_button.kv
+#:include assets\kv_files\utils.kv
 
 <PlayScreen>:
+
     id: play_screen
     points_lbl: points_label_id
 #    lives_lbl: lives_label_id
@@ -9,11 +10,14 @@
     time_lbl: time_label_id
 
 
+    # screen
     BoxLayout:
         orientation: 'vertical'
         spacing: self.height * 0.05
-        size_hint: [1, 1]
+        size_hint: [0.95, 0.95]
+        pos: self.parent.width * 0.025, self.parent.height * 0.025
 
+        # superior menu with points and game info
         BoxLayout:
             horizontal: True
             size_hint: [1, 0.2]
@@ -29,10 +33,6 @@
                     size_hint:[0.5, 0.5]
                     source: "assets\\images\\coins.png"
 
-#                Image:
-#                    size_hint:[0.5, 0.5]
-#                    source: "assets\\images\\heart.png"
-
                 Label:
                     size_hint:[0.5, 0.5]
                     text: "Hints"
@@ -45,10 +45,6 @@
                     id: points_label_id
                     text: "0"
 
-#                Label:
-#                    id: lives_label_id
-#                    text: "2"
-
                 Label:
                     id: hints_label_id
                     text: "0"
@@ -57,9 +53,47 @@
                     id: time_label_id
                     text: "00:00"
 
+        # game board
         GridLayout:
             id: board_widget_id
+            size_hint:[1, 0.55]
             spacing: self.width * 0.01
-            width: min(self.parent.width, self.parent.height) * 0.6
 
-            pos: self.parent.width * 0.2, self.parent.height * 0.2
+        # info area
+        BoxLayout:
+            id: info_widget_id
+            orientation: 'horizontal'
+            size_hint:[1, 0.25]
+
+            Image:
+
+                size_hint:[0.25, 1]
+
+                canvas:
+                    Rectangle:
+                        pos: 0, 0
+                        size: self.width, self.height
+
+
+            ScrollView:
+                size_hint:[0.75, 1]
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint:[1, None]
+
+                    canvas:
+                        Rectangle:
+                            pos: 0, 0
+                            size: self.width, self.height
+
+                    AdjustableLabel:
+                        id: info_name_widget_id
+                        size_hint:[1,1]
+                        text: "La libertad guiando al pueblo"
+
+                    AdjustableLabel:
+                        id: info_descp_widget_id
+                        size_hint:[1,1]
+                        text: "Cuadro del pintor frances Eugène Delacroix"
+
