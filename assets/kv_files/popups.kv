@@ -1,0 +1,46 @@
+<GameLosePopup>:
+    repeat_level_bttn: repeat_level_bttn_id
+    title: "Sorry you lose!"
+    size_hint: [0.5, 0.5]
+
+    BoxLayout:
+        orientation: "vertical"
+#        Label:
+#            text: "Sorry you lose!"
+#            size_hint: [1, 0.2]
+
+        BoxLayout:
+            size_hint: [1, 0.6]
+
+        Button:
+            id: repeat_level_bttn
+
+            text: "Repeat Level"
+            size_hint: [0.6, 0.2]
+            pos: root.width * 0.5, root.height * 0.5
+            on_press: root.dismiss()
+
+
+
+<GameWinPopup>:
+    continue_playing_bttn: continue_playing_bttn_id
+    title: "Congratulations!!!"
+    size_hint: [0.5, 0.5]
+
+    BoxLayout:
+        orientation: "vertical"
+
+#        Label:
+#            text:
+#            size_hint: [1, 0.2]
+
+        BoxLayout:
+            size_hint: [1, 0.6]
+
+        Button:
+            id: continue_playing_bttn_id
+            text: "Continue"
+            size_hint: [0.5, 0.2]
+            pos: root.width * 0.5, root.height * 0.5
+            on_press: root.dismiss()
+

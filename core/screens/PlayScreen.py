@@ -1,9 +1,18 @@
-from kivy.properties import ObjectProperty, Clock
-from kivy.uix.screenmanager import Screen
 from math import sqrt
-from core.BoardCell import BoardCell
 from core.Configs import Config
+from kivy.uix.popup import Popup
+from core.BoardCell import BoardCell
+from kivy.uix.screenmanager import Screen
+from kivy.properties import ObjectProperty, Clock
 from core.levels.LevelManager import LevelManager
+
+
+class GameWinPopup(Popup):
+    continue_playing_bttn = ObjectProperty()
+
+
+class GameLosePopup(Popup):
+    repeat_level_bttn = ObjectProperty()
 
 
 class PlayScreen(Screen):
@@ -11,7 +20,6 @@ class PlayScreen(Screen):
     # region WIDGETS
 
     board_widget = ObjectProperty()
-    # lives_lbl = ObjectProperty()
     points_lbl = ObjectProperty()
     hints_lbl = ObjectProperty()
     time_lbl = ObjectProperty()
@@ -23,8 +31,6 @@ class PlayScreen(Screen):
 
         # the level currently being played
         self.current_level = None
-
-        self.register_event_type('on_game_ended')
 
         self.level_manager = LevelManager()
 
@@ -38,12 +44,20 @@ class PlayScreen(Screen):
         # the cell to selected by user
         self.cell_selected = None
 
+        self.lose_popup = GameLosePopup()
+        self.lose_popup.pos = [self.width * 0.5, self.height * 0.5]
+        self.lose_popup.bind(on_press=self.save_and_continue)
+
+        self.win_popup = GameWinPopup()
+        self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
+        self.win_popup.bind(on_press=lambda obj: self.load_level(self.current_level))
+
         self.load_level(self.level_manager.next_level)
 
     # region Board Interaction
 
     def cell_pressed(self, board_cell):
-
+        self.game_end(True)
         # the board has to be visible and a level must be loaded
         if not board_cell.visible or self.current_level is None:
             return
@@ -106,10 +120,8 @@ class PlayScreen(Screen):
             if not self.board[i][j].visible:
 
                 self.board[i][j].visible = True
-
                 self.points += self.current_level.points
 
-                # just one cell discovered
                 return
 
     # endregion
@@ -132,7 +144,8 @@ class PlayScreen(Screen):
                 all_visible = all_visible and self.board[i][j].visible
 
         if all_visible:
-            self.dispatch("on_game_ended", True)
+            # game win
+            self.game_end(True)
 
     def load_level(self, level):
         """
@@ -154,7 +167,7 @@ class PlayScreen(Screen):
         # items are a list of n**2 elements with n the size of the board
         self.board_widget.cols = int(sqrt(len(level.items)))
 
-        self.board = [[BoardCell(i, j, level.items[i * cols + j])
+        self.board = [[BoardCell(i, j, level.items[i * cols + j], )
                        for j in xrange(cols)]
                       for i in xrange(cols)]
 
@@ -167,39 +180,30 @@ class PlayScreen(Screen):
         self.resume_game()
 
     def pause_game(self):
-        pass
+        self.game_paused = True
 
     def resume_game(self):
         self.game_paused = False
 
         Clock.schedule_interval(self.update_time, 1)
 
-    def on_game_ended(self, game_win):
+    def save_and_continue(self):
         """
-        event raised when the game has end in this level
+        save the data of the current level of play. Unlock the next levels
+        and load the next one
         :return:
         """
-        pass
+        self.level_manager.save_level_points(self.points)
+
+        # unlock levels
+
+
 
     def game_end(self, game_win):
         # save the user points for the level
+        result_popup = self.win_popup if game_win else self.lose_popup
 
-        if game_win:
-            print("game wined")
-
-            self.level_manager.save_level_points(self.points)
-
-            self.dispatch("on_game_ended", True)
-            return
-
-        # ask for repeat level if lose
-        repeat_level = False
-
-        if repeat_level:
-            # if true reload level
-            self.load_level(self.current_level)
-        else:
-            self.dispatch("on_game_ended", True)
+        result_popup.open()
 
     # endregion
 
@@ -244,6 +248,9 @@ class PlayScreen(Screen):
     # endregion
 
     def update_time(self, dt):
+        if self.game_paused:
+            return
+
         current_time = self.time_sec
 
         if current_time > 0:
@@ -251,6 +258,7 @@ class PlayScreen(Screen):
 
         self.time_sec = current_time
 
+        # the time has finished
         if current_time == 0:
             self.game_end(False)
 
