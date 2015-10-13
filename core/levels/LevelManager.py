@@ -83,7 +83,7 @@ class LevelManager:
         def save_level_points(self, points):
 
             self.level_points.append(points)
-            self.current_level_index+=1
+            self.current_level_index += 1
 
             # save the points data
             self.db.store_put("score", self.level_points)

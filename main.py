@@ -30,6 +30,9 @@ class GameApp(App):
         self.levels_screen = LevelsScreen(name='levels')
         self.settings_screen = SettingsScreen(name='settings')
 
+        # dict for i18n
+        self.translate_dict = {}
+
         self.screens = [self.menu_screen, self.levels_screen, self.settings_screen, self.author_screen, self.play_screen]
 
     def build_config(self, config):
@@ -62,6 +65,10 @@ class GameApp(App):
             return
 
     # endregion
+
+    def translate(self):
+        pass
+
     def build(self):
         # add the screens to use on the app
         for screen in self.screens:

@@ -44,12 +44,14 @@ class BoardCell(Button):
         if self.sound:
             self.sound.volume = 0.2
 
+        self.background_normal = self.NORMAL_BACKGROUND
+
         if level_item is not None:
             self.level_item = level_item
 
             self.item_text = level_item.name
             self.active = self.level_item.active
-            self._visible = self.level_item.visible
+            self.visible = self.level_item.visible
 
     @property
     def visible(self):

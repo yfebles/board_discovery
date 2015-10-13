@@ -46,18 +46,19 @@ class PlayScreen(Screen):
 
         self.lose_popup = GameLosePopup()
         self.lose_popup.pos = [self.width * 0.5, self.height * 0.5]
-        self.lose_popup.bind(on_press=self.save_and_continue)
+        self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level))
 
         self.win_popup = GameWinPopup()
         self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
-        self.win_popup.bind(on_press=lambda obj: self.load_level(self.current_level))
+        self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
         self.load_level(self.level_manager.next_level)
 
     # region Board Interaction
 
     def cell_pressed(self, board_cell):
-        self.game_end(True)
+        # self.game_end(True)
+
         # the board has to be visible and a level must be loaded
         if not board_cell.visible or self.current_level is None:
             return
@@ -187,23 +188,25 @@ class PlayScreen(Screen):
 
         Clock.schedule_interval(self.update_time, 1)
 
-    def save_and_continue(self):
+    def save_and_continue(self, obj):
         """
         save the data of the current level of play. Unlock the next levels
         and load the next one
         :return:
         """
-        self.level_manager.save_level_points(self.points)
+
+        print("Save and continue ...")
+        # self.level_manager.save_level_points(self.points)
 
         # unlock levels
-
-
 
     def game_end(self, game_win):
         # save the user points for the level
         result_popup = self.win_popup if game_win else self.lose_popup
 
-        result_popup.open()
+        self.pause_game()
+
+        Clock.schedule_once(result_popup.open, timeout=1)
 
     # endregion
 
