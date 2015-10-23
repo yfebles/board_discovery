@@ -1,7 +1,6 @@
 #:include assets\kv_files\play_screen.kv
 #:include assets\kv_files\author_screen.kv
 #:include assets\kv_files\levels_screen.kv
-#:include assets\kv_files\settings_screen.kv
 
 <MenuScreen>:
     id: menu_screen
@@ -18,7 +17,7 @@
 
         RoundedButton:
             text: "Settings"
-            on_press: app.screen_manager.current = 'settings'
+            on_press: app.open_settings()
 
         RoundedButton:
             text: "Levels"

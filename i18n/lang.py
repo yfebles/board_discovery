@@ -3,7 +3,6 @@ languages = {
 
     'en': {},
 
-
     'es': {},
 
     'fr': {},

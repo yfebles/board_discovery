@@ -7,7 +7,7 @@ class Level:
     Contain the elements
     """
 
-    def __init__(self, name="", time_seg=60, points=1000, items=None, relations=None):
+    def __init__(self, name, time_sec, points, items=None, relations=None):
         """
         Create a new level of game.
         :param items: the board items
@@ -25,16 +25,14 @@ class Level:
             self.items = [LevelItem(item["image"], item["name"], item["visible"], item["unlocked_times"], item["hints"])
                           for item in items]
 
-        self.relations = [[]]
+        self.relations = [[] for i in xrange(len(self.items))]
+
         if self.relations is not None:
             self.relations = relations
 
-        elif len(relations) != len(items) * len(items):
-            raise Exception("Relations must be a square matrix of size {0}".format(len(items) * len(items)))
-
         self.name = name
         self.points = points
-        self.time_seg = time_seg
+        self.time_sec = time_sec
 
     def get_hint(self, index):
         """
@@ -59,10 +57,10 @@ class Level:
         if not 0 <= i < len(self.items) or not 0 <= j < len(self.items):
             raise IndexError()
 
-        return self.relations[i][j]
+        return i in self.relations[j] or j in self.relations[i]
 
     def clone(self):
-        copy_level = Level(self.name, self.time_seg, self.points,   items=None, relations=self.relations)
+        copy_level = Level(self.name, self.time_sec, self.points,   items=None, relations=self.relations)
         copy_level.items = [i.clone() for i in self.items]
         return copy_level
 
@@ -89,6 +87,6 @@ class Level:
 
     def __str__(self):
         return self.name + " points: " + str(self.points) + " time: " + \
-            str(self.time_seg) + " items: " + str(self.items) + " relations: " + str(self.relations)
+            str(self.time_sec) + " items: " + str(self.items) + " relations: " + str(self.relations)
 
 

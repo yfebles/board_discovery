@@ -1,5 +1,5 @@
 from math import sqrt
-from core.Configs import Config
+from kivy.config import Config
 from kivy.uix.popup import Popup
 from core.BoardCell import BoardCell
 from kivy.uix.screenmanager import Screen
@@ -23,18 +23,19 @@ class PlayScreen(Screen):
     points_lbl = ObjectProperty()
     hints_lbl = ObjectProperty()
     time_lbl = ObjectProperty()
+    item_name_lbl = ObjectProperty()
+    item_descp_lbl = ObjectProperty()
+    item_image = ObjectProperty()
 
     # endregion
 
     def __init__(self, *args, **kwargs):
         super(PlayScreen, self).__init__(*args, **kwargs)
 
-        # the level currently being played
-        self.current_level = None
-
         self.level_manager = LevelManager()
 
-        self.app_configs = Config()
+        # the level currently being played
+        self.current_level = None
 
         self.game_paused = False
 
@@ -52,163 +53,7 @@ class PlayScreen(Screen):
         self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
-        self.load_level(self.level_manager.next_level)
 
-    # region Board Interaction
-
-    def cell_pressed(self, board_cell):
-        # self.game_end(True)
-
-        # the board has to be visible and a level must be loaded
-        if not board_cell.visible or self.current_level is None:
-            return
-
-        # if no previous selection
-        if self.cell_selected is None:
-            self.cell_selected = board_cell
-            board_cell.selected = True
-            return
-
-        else:
-            # check if the two cells are related
-            row_1, col_1 = self.cell_selected.row, self.cell_selected.col
-            row_2, col_2 = board_cell.row, board_cell.col
-
-            columns = self.board_widget.cols
-
-            # the position in the relations level matrix
-            cell_1_position = row_1 * columns + col_1
-            cell_2_position = row_2 * columns + col_2
-
-            # if the two cells are related
-            if self.current_level.relations[cell_1_position][cell_2_position]:
-                self.discover_cells(row_1, col_1)
-                self.discover_cells(row_2, col_2)
-
-            self.cell_selected.selected = False
-            self.cell_selected = None
-
-        # check if the game has been wined
-        self.check_game_state()
-
-    def discover_cells(self, i, j):
-        """
-        Method that discover all the cells adjacent
-        to the position supplied
-        :param i: row of the cell to center the discovery in
-        :param j: col of the cell to center the discovery in
-        :return:
-        """
-        adjacent_cells = []
-
-        columns = self.board_widget.cols
-
-        if i > 0:
-            adjacent_cells.append((i - 1, j))
-
-        if i < columns - 1:
-            adjacent_cells.append((i + 1, j))
-
-        if j > 0:
-            adjacent_cells.append((i, j - 1))
-
-        if j < columns - 1:
-            adjacent_cells.append((i, j + 1))
-
-        for cell in adjacent_cells:
-            i, j = cell[0], cell[1]
-
-            if not self.board[i][j].visible:
-
-                self.board[i][j].visible = True
-                self.points += self.current_level.points
-
-                return
-
-    # endregion
-
-    # region Game Interaction
-
-    def check_game_state(self):
-        """
-        checks if the game is finished or not.
-        If game has been wined or lose raise the events accordingly
-        :return:
-        """
-        # the game is wined if all the cells are visible
-        all_visible = True
-
-        columns = self.board_widget.cols
-
-        for i in xrange(columns):
-            for j in xrange(columns):
-                all_visible = all_visible and self.board[i][j].visible
-
-        if all_visible:
-            # game win
-            self.game_end(True)
-
-    def load_level(self, level):
-        """
-        Load into the play screen the data of the level supplied
-        :param level: the level supplied (if any) else try to load the next
-        un played level
-        """
-
-        self.current_level = level.clone()
-
-        # self.lives_lbl.text = "3"
-        self.hints = 3
-        self.points = 0
-        self.time_sec = 10
-        self.board_widget.clear_widgets()
-
-        cols = self.board_widget.cols
-
-        # items are a list of n**2 elements with n the size of the board
-        self.board_widget.cols = int(sqrt(len(level.items)))
-
-        self.board = [[BoardCell(i, j, level.items[i * cols + j], )
-                       for j in xrange(cols)]
-                      for i in xrange(cols)]
-
-        for i in xrange(cols):
-            for j in xrange(cols):
-                self.board_widget.add_widget(self.board[i][j])
-
-                self.board[i][j].bind(on_press=self.cell_pressed)
-
-        self.resume_game()
-
-    def pause_game(self):
-        self.game_paused = True
-
-    def resume_game(self):
-        self.game_paused = False
-
-        Clock.schedule_interval(self.update_time, 1)
-
-    def save_and_continue(self, obj):
-        """
-        save the data of the current level of play. Unlock the next levels
-        and load the next one
-        :return:
-        """
-
-        print("Save and continue ...")
-        # self.level_manager.save_level_points(self.points)
-
-        # unlock levels
-
-    def game_end(self, game_win):
-        # save the user points for the level
-        result_popup = self.win_popup if game_win else self.lose_popup
-
-        self.pause_game()
-
-        Clock.schedule_once(result_popup.open, timeout=1)
-
-    # endregion
 
     # region Properties
 
@@ -250,19 +95,176 @@ class PlayScreen(Screen):
 
     # endregion
 
-    def update_time(self, dt):
-        if self.game_paused:
+    def check_game_state(self):
+        """
+        checks if the game is finished or not.
+        If game has been wined or lose raise the events accordingly
+        :return:
+        """
+        # the game is wined if all the cells are visible
+        columns = self.board_widget.cols
+
+        all_visible = all([self.board[i][j].visible for i in xrange(columns) for j in xrange(columns)])
+
+        if all_visible:
+            # game win animation
+            self.pause_game()
+
+            Clock.schedule_once(self.win_popup.open, timeout=1)
+
+    def load_level(self, level):
+        """
+        Load into the play screen the data of the level supplied
+        :param level: the level supplied (if any) else try to load the next
+        un played level
+        """
+
+        self.current_level = level
+        self.hints, self.points = 0, 0
+        self.time_sec = level.time_sec
+
+        self.board_widget.clear_widgets()
+        self.update_info_widget()
+
+        # items are a list of n**2 elements with n the size of the board
+        self.board_widget.cols = int(sqrt(len(level.items)))
+
+        cols = self.board_widget.cols
+
+        self.board = []
+
+        for i in xrange(cols):
+            self.board.append([])
+
+            for j in xrange(cols):
+
+                self.board[i].append(BoardCell(i, j, level.items[i * cols + j]))
+                self.board[i][j].bind(on_press=self.cell_pressed)
+                self.board_widget.add_widget(self.board[i][j])
+
+    def save_and_continue(self, obj):
+        """
+        save the data of the current level of play. Unlock the next levels
+        and load the next one
+        :return:
+        """
+        # todo save level data, unlock levels and load next one
+        self.load_next_level()
+
+    def load_next_level(self):
+        next_level = self.level_manager.get_next_level(self.current_level)
+
+        if next_level is None:
+            self.clear_widgets()
+            Clock.schedule_once(self.win_popup.open, timeout=1)
+
+        self.load_level(next_level)
+
+    def switch_pause_state(self):
+        action = self.resume_game if self.game_paused else self.pause_game
+        action()
+
+    def update_info_widget(self, board_cell=None):
+
+        name = "" if board_cell is None else board_cell.name
+        description = "" if board_cell is None else board_cell.description
+        image = "" if board_cell is None else board_cell.image
+
+        self.item_name_lbl.text = name
+        self.item_descp_lbl.text = description
+        self.item_image.source = image
+
+    def cell_pressed(self, board_cell):
+
+        # print(Config.getboolean('configs', 'sound'))
+
+        if not board_cell.visible or self.current_level is None or self.game_paused:
             return
 
-        current_time = self.time_sec
+        self.update_info_widget(board_cell)
 
-        if current_time > 0:
-            current_time -= 1
+        # if no previous selection
+        if self.cell_selected is None:
+
+            board_cell.selected = True
+            self.cell_selected = board_cell
+            return
+
+        else:
+            # check if the two cells are related
+            row_1, col_1 = self.cell_selected.row, self.cell_selected.col
+            row_2, col_2 = board_cell.row, board_cell.col
+
+            columns = self.board_widget.cols
+
+            # the position in the relations level matrix
+            cell_1_position = row_1 * columns + col_1
+            cell_2_position = row_2 * columns + col_2
+
+            # if the two cells are related
+            if self.current_level.are_connected(cell_1_position, cell_2_position):
+                self.discover_cells(row_1, col_1)
+                self.discover_cells(row_2, col_2)
+
+            self.cell_selected.selected = False
+            self.cell_selected = None
+
+        # check if the game has been wined
+        self.check_game_state()
+
+    def discover_cells(self, i, j):
+        """
+        Method that discover all the cells adjacent
+        to the position supplied
+        :param i: row of the cell to center the discovery in
+        :param j: col of the cell to center the discovery in
+        :return:
+        """
+        # directions up, down, left and right
+        adjacent_cells = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
+
+        columns = self.board_widget.cols
+
+        for row, col in adjacent_cells:
+            if 0 <= row < columns and 0 <= col < columns and not self.board[row][col].visible:
+                self.points += self.current_level.points
+                self.board[row][col].visible = True
+                return
+
+    def update_time(self, dt):
+        if self.game_paused:
+            return False
+
+        current_time = self.time_sec - 1
+
+        # the time has finished so the time has ended
+        if current_time <= 0:
+            self.pause_game()
+
+            # game lose animation
+            Clock.schedule_once(self.lose_popup.open, timeout=1)
 
         self.time_sec = current_time
 
-        # the time has finished
-        if current_time == 0:
-            self.game_end(False)
-
         return current_time > 0
+
+    def pause_game(self):
+        self.game_paused = True
+        # todo poner la foto de pause en el
+
+    def resume_game(self):
+        self.game_paused = False
+
+        Clock.schedule_interval(self.update_time, 1)
+
+    def on_leave(self, *args):
+        self.pause_game()
+
+    def on_enter(self, *args):
+
+        # if no level has been played
+        if self.current_level is None:
+            self.load_next_level()
+
+        if self.game_paused:
+            self.resume_game()

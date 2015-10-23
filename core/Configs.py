@@ -1,5 +1,4 @@
-import os
-from kivy.storage.jsonstore import JsonStore
+from kivy.config import Config
 
 
 class Config:
@@ -9,26 +8,11 @@ class Config:
 
     class __Singleton:
 
-        app_config = None
-
         def __init__(self, **kwargs):
-            self._use_sounds = kwargs["sounds"] if "sounds" in kwargs else True
-            self._use_hints =  kwargs["hints"] if "hints" in kwargs else True
-            self.use_effects =  kwargs["effects"] if "effects" in kwargs else True
-
-
-        @property
-        def use_sounds(self):
-            return self._use_sounds
-
-        @property
-        def use_hints(self):
-            return self._use_hints
-
-        @property
-        def use_effects(self):
-            return self._use_effects
-
+            self.use_sounds = kwargs["sounds"] if "sounds" in kwargs else True
+            self.use_hints = kwargs["hints"] if "hints" in kwargs else True
+            self.use_effects = kwargs["effects"] if "effects" in kwargs else True
+            self.current_level = kwargs["current_level"] if "current_level" in kwargs else 0
 
     # storage for the instance reference
     __instance = None

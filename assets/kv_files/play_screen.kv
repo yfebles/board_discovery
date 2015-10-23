@@ -6,10 +6,12 @@
 
     id: play_screen
     points_lbl: points_label_id
-#    lives_lbl: lives_label_id
     hints_lbl: hints_label_id
     board_widget: board_widget_id
     time_lbl: time_label_id
+    item_name_lbl: info_name_widget_id
+    item_descp_lbl: info_descp_widget_id
+    item_image: info_image_id
 
     # screen
     BoxLayout:
@@ -50,9 +52,10 @@
                     id: hints_label_id
                     text: "0"
 
-                Label:
+                Button:
                     id: time_label_id
                     text: "00:00"
+                    on_press: root.switch_pause_state()
 
         # game board
         GridLayout:
@@ -62,18 +65,13 @@
 
         # info area
         BoxLayout:
-            id: info_widget_id
+
             orientation: 'horizontal'
             size_hint:[1, 0.25]
 
             Image:
-
+                id: info_image_id
                 size_hint:[0.25, 1]
-
-                canvas:
-                    Rectangle:
-                        pos: 0, 0
-                        size: self.width, self.height
 
 
             ScrollView:
@@ -82,11 +80,6 @@
                 BoxLayout:
                     orientation: 'vertical'
                     size_hint:[1, None]
-
-                    canvas:
-                        Rectangle:
-                            pos: 0, 0
-                            size: self.width, self.height
 
                     AdjustableLabel:
                         id: info_name_widget_id

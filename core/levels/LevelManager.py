@@ -24,7 +24,6 @@ class LevelManager:
             # initialize the levels variables
             self.levels = []
             self.level_points = []
-            self.current_level_index = -1
 
             # load the levels info and configure it
             self.db = JsonStore(os.path.join('core', 'levels', 'game.json'))
@@ -46,14 +45,12 @@ class LevelManager:
 
                 level.items = self._get_level_items(l["items"])
 
-                relations = [[value > 0 for value in row] for row in l["relations"]]
+                relations = [[value for value in row] for row in l["relations"]]
                 level.relations = relations
 
                 self.levels.append(level)
 
             self.level_points = self.db["score"]
-
-            self.current_level_index = len(self.level_points)
 
         def _get_level_items(self, items_json):
             """
@@ -66,29 +63,27 @@ class LevelManager:
             return [LevelItem(i["image"], i["name"], i["visible"] == 1, i["unlocked_times"], i["hints"])
                     for i in items_json]
 
-        @property
-        def next_level(self):
+        def save_points(self, level, points):
+            if level not in self.levels:
+                raise  Exception()
+
+            index = self.level.index(level)
+
+        def get_next_level(self, level=None):
             """
-            computes and return the next level if any.
+            computes and return the next level if any that is just after the supplied one
+            The first if no supplied.
             :return: Level object if there is another level or None if no more levels
             """
 
-            self.current_level_index = len(self.level_points)
+            index = -1 if level is None else -1 if level not in self.levels else self.levels.index(level)
 
-            if self.current_level_index >= len(self.levels):
+            index += 1
+
+            if index > len(self.levels):
                 return None
 
-            return self.levels[self.current_level_index]
-
-        def save_level_points(self, points):
-
-            self.level_points.append(points)
-            self.current_level_index += 1
-
-            # save the points data
-            self.db.store_put("score", self.level_points)
-
-            print(self.db["score"])
+            return self.levels[index]
 
     __instance = None
 

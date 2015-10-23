@@ -16,6 +16,7 @@ class LevelItem:
         self.name = name
         self.visible = visible
         self.image = image
+        self.description = ""
         self.unlocked_times = unlocked_times
 
     def clone(self):

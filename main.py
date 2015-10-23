@@ -11,6 +11,7 @@ class GameApp(App):
     KV_FILE_PATH = os.path.join("assets", "kv_files", "menu_screen.kv")
 
     # endregion
+    use_kivy_settings = False
 
     # region Initialize
 
@@ -28,12 +29,21 @@ class GameApp(App):
         self.play_screen = PlayScreen(name='play')
         self.author_screen = AuthorScreen(name='author')
         self.levels_screen = LevelsScreen(name='levels')
-        self.settings_screen = SettingsScreen(name='settings')
+
+        self.screen_manager.add_widget(self.menu_screen)
+        self.screen_manager.add_widget(self.levels_screen)
+        self.screen_manager.add_widget(self.author_screen)
+        self.screen_manager.add_widget(self.play_screen)
+
+        self.levels_screen.bind(on_open_level=self.load_level)
 
         # dict for i18n
         self.translate_dict = {}
 
-        self.screens = [self.menu_screen, self.levels_screen, self.settings_screen, self.author_screen, self.play_screen]
+    def load_level(self, obj, level):
+        self.play_screen.pause_game()
+        self.play_screen.load_level(level)
+        self.screen_manager.current = 'play'
 
     def build_config(self, config):
         config.add_section('configs')
@@ -41,10 +51,11 @@ class GameApp(App):
         config.set('configs', 'effects', True)
         config.set('configs', 'show_hints', True)
         config.set('configs', 'first_run', True)
+        config.set('configs', 'current_level', 0)
 
     def build_settings(self, settings):
-
         jsondata = '''[
+
         { "type": "bool", "title": "Sound",
           "desc": "Active application sounds",
           "section": "configs", "key": "sound" },
@@ -60,20 +71,12 @@ class GameApp(App):
 
         settings.add_json_panel('Settings', self.config, data=jsondata)
 
-    def on_config_change(self, config, section, key, value):
-        if config != self.config or section != 'configs':
-            return
-
     # endregion
 
-    def translate(self):
+    def translate(self, text):
         pass
 
     def build(self):
-        # add the screens to use on the app
-        for screen in self.screens:
-            self.screen_manager.add_widget(screen)
-
         return self.screen_manager
 
 if __name__ == '__main__':

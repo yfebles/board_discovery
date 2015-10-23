@@ -1,7 +1,9 @@
-* Logic de pasar los niveles
-* Vista de niveles (bloqueados etc)
+* config read and write
+* level info store and state
+* create levels
+* compile
+* design
+* ui implementation with effects and
 
-* Configuration handling with effects and sounds
 
-* levels creation
-* db implementation for store levels
+
