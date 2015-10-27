@@ -41,7 +41,7 @@ class GameApp(App):
         self.translate_dict = {}
 
     def load_level(self, obj, level):
-        self.play_screen.pause_game()
+        self.play_screen.pause()
         self.play_screen.load_level(level)
         self.screen_manager.current = 'play'
 

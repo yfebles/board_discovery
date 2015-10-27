@@ -1,7 +1,4 @@
-import os
-from kivy.storage.jsonstore import JsonStore
-from core.levels.Level import Level
-from core.levels.LevelItem import LevelItem
+from core.levels.orm.db_orm import DB, Statistics, Level
 
 
 class LevelManager:
@@ -11,7 +8,6 @@ class LevelManager:
     """
 
     class __Singleton:
-        LEVELS_PATH = ""
 
         # the list of levels
         levels = None
@@ -26,7 +22,7 @@ class LevelManager:
             self.level_points = []
 
             # load the levels info and configure it
-            self.db = JsonStore(os.path.join('core', 'levels', 'game.json'))
+            self.db = DB().get_db_session()
 
             self.__load_levels()
 
@@ -36,38 +32,25 @@ class LevelManager:
             for the game
             :return:
             """
-            levels_list = self.db["levels"]
+            self.levels = []
 
-            for l in levels_list:
-                name, time, points = l["name"], l["time_seg"], l["points"]
+            try:
+                print("AAAAAAAAAAAAAAAAAAAAA")
+                a = self.db.query(Level).all()
 
-                level = Level(name, time, points)
+                for l in a:
+                    name, time, points = l.name, l.time_seg, l.points
 
-                level.items = self._get_level_items(l["items"])
+                    level = Level(name, time, points)
 
-                relations = [[value for value in row] for row in l["relations"]]
-                level.relations = relations
+                    level.items = self._get_level_items(l["items"])
 
-                self.levels.append(level)
-
-            self.level_points = self.db["score"]
-
-        def _get_level_items(self, items_json):
-            """
-            Transform the list of items supplied in json dict format into the levelItem class
-            :param items_json: the level item in json format
-            :return:
-            """
-
-            # create the level items wit params of the json items,  visible is int --> (0,1)
-            return [LevelItem(i["image"], i["name"], i["visible"] == 1, i["unlocked_times"], i["hints"])
-                    for i in items_json]
-
-        def save_points(self, level, points):
-            if level not in self.levels:
-                raise  Exception()
-
-            index = self.level.index(level)
+                    relations = [[value for value in row] for row in l["relations"]]
+                    level.relations = relations
+    
+                    self.levels.append(level)
+            except:
+                pass
 
         def get_next_level(self, level=None):
             """
@@ -84,6 +67,20 @@ class LevelManager:
                 return None
 
             return self.levels[index]
+
+        def save_points(self, level, points):
+            """
+            save the amount of points as the result of play the
+            level supplied
+            :return:
+            """
+            try:
+
+                self.db.add(Statistics(level=level, points=points))
+                self.db.commit()
+
+            except Exception as ex:
+                print(ex.message)
 
     __instance = None
 

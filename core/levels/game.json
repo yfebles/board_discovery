@@ -46,7 +46,7 @@
                      {"name": "Medalla de plata", "image":"medalla_plata.jpg", "visible":2, "unlocked_times":3, "hints":[]}
           ],
 
-          "relations": [ [1,2], [2], [], [5], [], [7,8], [8], [] ]
+          "relations": [[1,2], [2], [], [5], [], [7,8], [8], []]
         }
       ],
 

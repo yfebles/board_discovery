@@ -18,9 +18,10 @@ class LevelsScreen(Screen):
 
         self.levels_grid.bind(minimum_height=self.levels_grid.setter('height'))
 
+    def load_levels(self):
         # load the levels as
         for i in xrange(len(self.level_manager.levels)):
-            level_button = Button(text="?", size_hint_y=None, on_press=self.raise_open_level(i))
+            level_button = Button(text=str(i+1), size_hint_y=None, on_press=self.raise_open_level(i))
             self.levels_grid.add_widget(level_button)
 
     def raise_open_level(self, index):
@@ -34,3 +35,6 @@ class LevelsScreen(Screen):
         :return:
         """
         pass
+
+    def on_enter(self, *args):
+        self.load_levels()

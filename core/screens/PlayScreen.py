@@ -1,10 +1,11 @@
 from math import sqrt
-from kivy.config import Config
+from kivy.config import Config, ConfigParser
 from kivy.uix.popup import Popup
 from core.BoardCell import BoardCell
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty, Clock
 from core.levels.LevelManager import LevelManager
+from core.levels.orm.db_orm import DB
 
 
 class GameWinPopup(Popup):
@@ -34,10 +35,12 @@ class PlayScreen(Screen):
 
         self.level_manager = LevelManager()
 
+        self.db = DB().get_db_session()
+
         # the level currently being played
         self.current_level = None
 
-        self.game_paused = False
+        self.game_paused = True
 
         self.board_widget.cols = 3
         self.board = [[]]
@@ -53,7 +56,7 @@ class PlayScreen(Screen):
         self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
-
+        Clock.schedule_interval(self.update_time, 1)
 
     # region Properties
 
@@ -95,22 +98,17 @@ class PlayScreen(Screen):
 
     # endregion
 
-    def check_game_state(self):
+    # region Level Handling
+
+    def save_and_continue(self, obj):
         """
-        checks if the game is finished or not.
-        If game has been wined or lose raise the events accordingly
+        save the data of the current level of play. Unlock the next levels
+        and load the next one
         :return:
         """
-        # the game is wined if all the cells are visible
-        columns = self.board_widget.cols
+        self.level_manager.save_points(self.current_level)
 
-        all_visible = all([self.board[i][j].visible for i in xrange(columns) for j in xrange(columns)])
-
-        if all_visible:
-            # game win animation
-            self.pause_game()
-
-            Clock.schedule_once(self.win_popup.open, timeout=1)
+        self.load_next_level()
 
     def load_level(self, level):
         """
@@ -142,15 +140,6 @@ class PlayScreen(Screen):
                 self.board[i][j].bind(on_press=self.cell_pressed)
                 self.board_widget.add_widget(self.board[i][j])
 
-    def save_and_continue(self, obj):
-        """
-        save the data of the current level of play. Unlock the next levels
-        and load the next one
-        :return:
-        """
-        # todo save level data, unlock levels and load next one
-        self.load_next_level()
-
     def load_next_level(self):
         next_level = self.level_manager.get_next_level(self.current_level)
 
@@ -160,9 +149,26 @@ class PlayScreen(Screen):
 
         self.load_level(next_level)
 
-    def switch_pause_state(self):
-        action = self.resume_game if self.game_paused else self.pause_game
-        action()
+    # endregion
+
+    # region Game Behavior
+
+    def check_game_state(self):
+        """
+        checks if the game is finished or not.
+        If game has been wined or lose raise the events accordingly
+        :return:
+        """
+        # the game is wined if all the cells are visible
+        columns = self.board_widget.cols
+
+        all_visible = all([self.board[i][j].visible for i in xrange(columns) for j in xrange(columns)])
+
+        if all_visible:
+            # game win animation
+            self.pause()
+
+            Clock.schedule_once(self.win_popup.open, timeout=1)
 
     def update_info_widget(self, board_cell=None):
 
@@ -175,8 +181,6 @@ class PlayScreen(Screen):
         self.item_image.source = image
 
     def cell_pressed(self, board_cell):
-
-        # print(Config.getboolean('configs', 'sound'))
 
         if not board_cell.visible or self.current_level is None or self.game_paused:
             return
@@ -231,34 +235,22 @@ class PlayScreen(Screen):
                 self.board[row][col].visible = True
                 return
 
-    def update_time(self, dt):
-        if self.game_paused:
-            return False
+    # endregion
 
-        current_time = self.time_sec - 1
+    # region Pause & Play
 
-        # the time has finished so the time has ended
-        if current_time <= 0:
-            self.pause_game()
+    def switch_pause_state(self):
+        action = self.play if self.game_paused else self.pause
+        action()
 
-            # game lose animation
-            Clock.schedule_once(self.lose_popup.open, timeout=1)
-
-        self.time_sec = current_time
-
-        return current_time > 0
-
-    def pause_game(self):
+    def pause(self):
         self.game_paused = True
-        # todo poner la foto de pause en el
 
-    def resume_game(self):
+    def play(self):
         self.game_paused = False
 
-        Clock.schedule_interval(self.update_time, 1)
-
     def on_leave(self, *args):
-        self.pause_game()
+        self.pause()
 
     def on_enter(self, *args):
 
@@ -267,4 +259,25 @@ class PlayScreen(Screen):
             self.load_next_level()
 
         if self.game_paused:
-            self.resume_game()
+            self.play()
+
+    # endregion
+
+    def update_time(self, dt):
+
+        # if pause keep
+        if self.game_paused:
+            return True
+
+        current_time = self.time_sec - 1
+
+        # the time has finished so the time has ended
+        if current_time <= 0:
+            self.pause()
+
+            # game lose animation
+            Clock.schedule_once(self.lose_popup.open, timeout=1)
+
+        self.time_sec = current_time
+
+        return True
