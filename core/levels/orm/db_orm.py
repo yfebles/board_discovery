@@ -1,33 +1,39 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, Integer, ForeignKey, String, Text, Boolean, Float, Date, func, and_
-from sqlalchemy import create_engine, orm, and_
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
-from PyQt4.QtGui import QPixmap
 import os
+from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
+from sqlalchemy import create_engine, orm
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, mapper
 
 
 Base = declarative_base()
 
-db_path = os.path.join(os.getcwd(), "db")
+db_path = "" #os.path.join(os.getcwd(), "core", "levels", "orm")
+
+
+
+class ItemLevel(Base):
+
+    __tablename__ = 'item_level'
+    item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
+    level_id = Column(Integer, ForeignKey('Level.level_id'), primary_key=True, nullable=False)
 
 
 class ItemTags(Base):
+
     __tablename__ = 'item_tags'
-    item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False, autoincrement=True)
+    item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey('Tags.tag_id'), primary_key=True, nullable=False)
     distance = Column(Integer, nullable=False)
 
 
 class Tag(Base):
-    """
-    The genre of a specie
-    """
+
     # region CONSTANTS
     __tablename__ = 'Tags'
     tag_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-
     name = Column(String(50), nullable=False, unique=True)
+
     # endregion
 
     def __eq__(self, other):
@@ -43,12 +49,16 @@ class Item(Base):
     """
 
     # region CONSTANTS
+
     __tablename__ = 'Item'
-    item_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    item_id = Column(Integer,  primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable=False, unique=True)
     descp = Column(String(300))
     image = Column(String(250))
-    # tags = relationship(Tag, backref='items', secondary=ItemTags)
+
+    tags = orm.relation(Tag, secondary='item_tags',  backref='items')
+
+    # related_items = orm.relation('Item', secondary='item_relation')
 
     # endregion
 
@@ -59,41 +69,63 @@ class Item(Base):
         return "name: {0}. id: {1} ".format(self.name, self.item_id)
 
 
-class Package(Base):
+class Statistics(Base):
 
-    __tablename__ = 'Package'
-    package_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    image = Column(String(50),  nullable=False)
-    name = Column(String(50), nullable=False)
+    # region CONSTANTS
+
+    __tablename__ = 'Statistics'
+    statistics_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    points = Column(Integer, nullable=False, default=0)
+    level_id = Column(Integer, ForeignKey('Level.level_id'), nullable=False)
+
+    # endregion
 
 
 class Level(Base):
 
+    # region CONSTANTS
+
     __tablename__ = 'Level'
     level_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    package = relationship(Package, backref='levels')
-    image = Column(String(50),  nullable=False)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False, unique=True)
+    image = Column(String(250))
+    time_seg = Column(Integer, nullable=False, default=60)
+    points = Column(Integer, nullable=False, default=10)
+    blocked = Column(Boolean, nullable=False, default=True)
+    package_id = Column(Integer, ForeignKey('Package.package_id'), nullable=False)
 
-    def are_connected(self, i, j):
-        """
-        return True if the level items at positions i and j are connected
-        on the relation matrix
-        :param i: index of first item
-        :param j: index of second item
-        :return:
-        """
-        if not 0 <= i < len(self.items) or not 0 <= j < len(self.items):
-            raise IndexError()
+    items = orm.relation(Item, secondary='item_level',  backref='levels')
+    statistic = orm.relation(Statistics, backref='levels')
 
-        return i in self.relations[j] or j in self.relations[i]
+    # endregion
+
+    def are_connected(self, item1, item2):
+        return item2 in item1.related_items or item1 in item2.related_items
 
 
-class Statistics(Base):
-    __tablename__ = 'Statistics'
-    statistic_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    points = Column(Integer,  nullable=False)
-    level = relationship(Level)
+class Package(Base):
+
+    # region CONSTANTS
+
+    __tablename__ = 'Package'
+    package_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)
+    levels = relationship(Level, backref='package')
+    image = Column(String(250))
+
+    # endregion
+
+
+class ItemRelation(Base):
+
+    __tablename__ = 'item_relation'
+
+    item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
+    item1_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
+    descp = Column(String(200), nullable=False)
+
+    items = orm.relation(Item, backref='related_items', primaryjoin=(Item.item_id == item_id))
+    items1 = orm.relation(Item, backref='related_items1', primaryjoin=(Item.item_id == item1_id))
 
 
 class DB:
@@ -112,3 +144,13 @@ class DB:
         Method that returns
         """
         return orm.scoped_session(orm.sessionmaker(bind=self.db)) if new_session else self._db_session
+
+
+a = DB().get_db_session()
+
+# for x in a.query(Item).all():
+#     for i in x.related_items:
+#         print(x.name, )
+
+
+

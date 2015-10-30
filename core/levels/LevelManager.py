@@ -1,4 +1,4 @@
-from core.levels.orm.db_orm import DB, Statistics, Level
+from core.levels.orm.db_orm import DB, Level, Package, Statistics
 
 
 class LevelManager:
@@ -9,48 +9,23 @@ class LevelManager:
 
     class __Singleton:
 
-        # the list of levels
-        levels = None
-
         def __init__(self):
 
-            if self.levels is not None:
-                return
-
-            # initialize the levels variables
-            self.levels = []
-            self.level_points = []
-
-            # load the levels info and configure it
             self.db = DB().get_db_session()
 
-            self.__load_levels()
+            # the raw list of levels
+            self.levels = self._get_db_data(Level)
 
-        def __load_levels(self):
-            """
-            set the configs and loads the levels data
-            for the game
-            :return:
-            """
-            self.levels = []
+            self.packages = self._get_db_data(Package)
 
+        def _get_db_data(self, entity):
             try:
-                print("AAAAAAAAAAAAAAAAAAAAA")
-                a = self.db.query(Level).all()
+                return self.db.query(entity).all()
 
-                for l in a:
-                    name, time, points = l.name, l.time_seg, l.points
+            except Exception as e:
+                print(e.message)
 
-                    level = Level(name, time, points)
-
-                    level.items = self._get_level_items(l["items"])
-
-                    relations = [[value for value in row] for row in l["relations"]]
-                    level.relations = relations
-    
-                    self.levels.append(level)
-            except:
-                pass
+            return []
 
         def get_next_level(self, level=None):
             """
@@ -59,14 +34,9 @@ class LevelManager:
             :return: Level object if there is another level or None if no more levels
             """
 
-            index = -1 if level is None else -1 if level not in self.levels else self.levels.index(level)
+            level_index = -1 if level is None else -1 if level not in self.levels else self.levels.index(level)
 
-            index += 1
-
-            if index > len(self.levels):
-                return None
-
-            return self.levels[index]
+            return None if level_index + 1 >= len(self.levels) else self.levels[level_index + 1]
 
         def save_points(self, level, points):
             """
@@ -76,7 +46,7 @@ class LevelManager:
             """
             try:
 
-                self.db.add(Statistics(level=level, points=points))
+                self.db.add(Statistics(level=level, points= points))
                 self.db.commit()
 
             except Exception as ex:
@@ -92,12 +62,12 @@ class LevelManager:
             LevelManager.__instance = LevelManager.__Singleton()
 
         # Store instance reference as the only member in the handle
-        self.__dict__['_VisualItemsCache__instance'] = LevelManager.__instance
+        self.__dict__['_LevelManager__instance'] = LevelManager.__instance
 
     def __getattr__(self, attr):
-        """ Delegate access to implementation """
+        """ Delegate access to singleton """
         return getattr(self.__instance, attr)
 
     def __setattr__(self, attr, value):
-        """ Delegate access to implementation """
+        """ Delegate access to singleton """
         return setattr(self.__instance, attr, value)

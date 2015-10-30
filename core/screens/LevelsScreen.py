@@ -19,10 +19,16 @@ class LevelsScreen(Screen):
         self.levels_grid.bind(minimum_height=self.levels_grid.setter('height'))
 
     def load_levels(self):
+
+        self.levels_grid.clear_widgets()
+
         # load the levels as
-        for i in xrange(len(self.level_manager.levels)):
-            level_button = Button(text=str(i+1), size_hint_y=None, on_press=self.raise_open_level(i))
-            self.levels_grid.add_widget(level_button)
+        for index, level in enumerate(self.level_manager.levels):
+            text = "X" if level.blocked else str(index + 1)
+
+            on_press_event = lambda obj: None if level.blocked else self.raise_open_level(index)
+
+            self.levels_grid.add_widget(Button(text=text, size_hint_y=None, on_press=on_press_event))
 
     def raise_open_level(self, index):
         return lambda obj: self.dispatch("on_open_level", self.level_manager.levels[index])

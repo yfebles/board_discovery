@@ -37,16 +37,22 @@ class PlayScreen(Screen):
 
         self.db = DB().get_db_session()
 
+        # Config Vars
+        self.sounds = True
+        self.effects = True
+        self.first_run = True
+
         # the level currently being played
         self.current_level = None
 
         self.game_paused = True
 
-        self.board_widget.cols = 3
         self.board = [[]]
 
         # the cell to selected by user
         self.cell_selected = None
+
+        # region win & lose Popups
 
         self.lose_popup = GameLosePopup()
         self.lose_popup.pos = [self.width * 0.5, self.height * 0.5]
@@ -55,6 +61,8 @@ class PlayScreen(Screen):
         self.win_popup = GameWinPopup()
         self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
+
+        # endregion
 
         Clock.schedule_interval(self.update_time, 1)
 
@@ -106,7 +114,7 @@ class PlayScreen(Screen):
         and load the next one
         :return:
         """
-        self.level_manager.save_points(self.current_level)
+        self.level_manager.save_points(self.current_level, self.points)
 
         self.load_next_level()
 
@@ -119,7 +127,7 @@ class PlayScreen(Screen):
 
         self.current_level = level
         self.hints, self.points = 0, 0
-        self.time_sec = level.time_sec
+        self.time_sec = level.time_seg
 
         self.board_widget.clear_widgets()
         self.update_info_widget()
@@ -181,6 +189,8 @@ class PlayScreen(Screen):
         self.item_image.source = image
 
     def cell_pressed(self, board_cell):
+
+        print(self.sounds, self.effects, self.first_run)
 
         if not board_cell.visible or self.current_level is None or self.game_paused:
             return
@@ -264,8 +274,7 @@ class PlayScreen(Screen):
     # endregion
 
     def update_time(self, dt):
-
-        # if pause keep
+        # if pause nothing to do
         if self.game_paused:
             return True
 
@@ -280,4 +289,5 @@ class PlayScreen(Screen):
 
         self.time_sec = current_time
 
+        # always return true to keep alive the timer
         return True

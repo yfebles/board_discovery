@@ -36,11 +36,14 @@ class BoardCell(Button):
         # the visibility state of the cell
         self._visible = visible
 
+        # if the cell is active to be used
+        self._active = True
+
         # the selection state of the cell
         self._selected = selected
 
         self._animate_back_image_index = 0
-        self.bricks_animation_images = [os.path.join('assets', 'images', 'brick_broke' + str(i) + '.png') for i in range(1,5)]
+        self.bricks_animation_images = [os.path.join('assets', 'images', 'brick_broke' + str(i) + '.png') for i in range(1, 5)]
 
         # self.sound = SoundLoader.load(self.SOUND_BRICKS)
         # if self.sound:
@@ -50,7 +53,7 @@ class BoardCell(Button):
 
         self.level_item = level_item
 
-        self.visible = self.level_item.visible
+        self.visible = False
 
     def set_cell_content(self, obj):
         """

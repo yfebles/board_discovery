@@ -1,9 +1,7 @@
-* config read and write
-* level info store and state
 * create levels
-* compile
-* design
-* ui implementation with effects and
+* compile into apk
+* design ui implementation
+* ui effects and game modes
 
 
 
