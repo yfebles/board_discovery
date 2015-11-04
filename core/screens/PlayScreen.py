@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from math import sqrt
 from kivy.config import Config, ConfigParser
+from kivy.graphics.context_instructions import Color
+from kivy.graphics.vertex_instructions import Rectangle
 from kivy.uix.popup import Popup
 from core.BoardCell import BoardCell
 from kivy.uix.screenmanager import Screen
@@ -23,7 +27,11 @@ class PlayScreen(Screen):
     board_widget = ObjectProperty()
     points_lbl = ObjectProperty()
     hints_lbl = ObjectProperty()
+
     time_lbl = ObjectProperty()
+    time_button = ObjectProperty()
+    time_color = ObjectProperty()
+
     item_name_lbl = ObjectProperty()
     item_descp_lbl = ObjectProperty()
     item_image = ObjectProperty()
@@ -36,6 +44,9 @@ class PlayScreen(Screen):
         self.level_manager = LevelManager()
 
         self.db = DB().get_db_session()
+
+        # the colors to put in the time label when the game moves on
+        self.time_colors = []
 
         # Config Vars
         self.sounds = True
@@ -64,7 +75,7 @@ class PlayScreen(Screen):
 
         # endregion
 
-        Clock.schedule_interval(self.update_time, 1)
+        # Clock.schedule_interval(self.update_time, 1)
 
     # region Properties
 
@@ -127,7 +138,7 @@ class PlayScreen(Screen):
 
         self.current_level = level
         self.hints, self.points = 0, 0
-        self.time_sec = level.time_seg
+        # self.time_sec = level.time_seg
 
         self.board_widget.clear_widgets()
         self.update_info_widget()
@@ -255,9 +266,11 @@ class PlayScreen(Screen):
 
     def pause(self):
         self.game_paused = True
+        self.time_button.text = ""
 
     def play(self):
         self.game_paused = False
+        self.time_button.text = ""
 
     def on_leave(self, *args):
         self.pause()
@@ -265,8 +278,8 @@ class PlayScreen(Screen):
     def on_enter(self, *args):
 
         # if no level has been played
-        if self.current_level is None:
-            self.load_next_level()
+        # if self.current_level is None:
+        #     self.load_next_level()
 
         if self.game_paused:
             self.play()

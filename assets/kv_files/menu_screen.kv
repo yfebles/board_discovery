@@ -11,6 +11,7 @@
         size_hint: [0.5, 0.8]
         pos: menu_screen.width * 0.25, menu_screen.height * 0.1
 
+
         RoundedButton:
             text: "Play"
             on_press: app.screen_manager.current = 'play'
@@ -25,7 +26,18 @@
 
         RoundedButton:
             text: "Author"
+            id: author_button
             on_press: app.screen_manager.current = 'author'
+
+            background_color: [0] * 4
+
+            canvas:
+
+                Color:
+                    rgba: [1, 1, 1, 0.1]
+                Line:
+                    rounded_rectangle: (author_button.pos[0], author_button.pos[1], author_button.width, author_button.height, 20, 50)
+                    width: 10
 
         RoundedButton:
             text: "Exit"

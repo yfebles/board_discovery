@@ -3,7 +3,6 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from core.screens import *
 
-
 class GameApp(App):
 
     # region CONSTANTS

@@ -1,94 +1,180 @@
 #:include assets\kv_files\utils.kv
 #:include assets\kv_files\popups.kv
+#:include math
 
 
 <PlayScreen>:
 
     id: play_screen
-    points_lbl: points_label_id
-    hints_lbl: hints_label_id
-    board_widget: board_widget_id
-    time_lbl: time_label_id
-    item_name_lbl: info_name_widget_id
-    item_descp_lbl: info_descp_widget_id
-    item_image: info_image_id
 
-    # screen
+    points_lbl: points_label_id
+    board_widget: board_widget_id
+
+    time_lbl: time_label_id
+    time_button: time_button_id
+    time_color: time_label_color_id
+
+    canvas:
+        Rectangle:
+            id: back_image
+            source:"assets\\images\\cristo.png"
+            pos:self.pos
+            size:self.size
+
+    # container
     BoxLayout:
         orientation: 'vertical'
-        spacing: self.height * 0.05
+        pos: play_screen.width * 0.025, play_screen.height * 0.025
         size_hint: [0.95, 0.95]
-        pos: self.parent.width * 0.025, self.parent.height * 0.025
 
-        # superior menu with points and game info
+
+        # top menu (menu, time and help)
         BoxLayout:
-            horizontal: True
+            id: top_menu
+            orientation: 'horizontal'
             size_hint: [1, 0.2]
+            spacing: top_menu.width * 0.02
+
             Button:
-                size_hint:[0.2,1]
-                text: "Menu"
+                id: menu_button
+                size_hint:[0.2, 1]
+                font_name: "assets\\fonts\\fontawesome-webfont.ttf"
+                text: ""
+                font_size: min(menu_button.width,menu_button.height) * 0.4
+
+                canvas.before:
+                    Color:
+                        rgba: (1, 1, 1, 0.35)
+                    Line:
+                        circle: (menu_button.center_x, menu_button.center_y, min(menu_button.width,menu_button.height)  * 0.47)
+                        width: min(3, min(menu_button.width, menu_button.height) * 0.05)
+
+                # invisible background
+                background_color: [0] * 4
+
                 on_press: app.screen_manager.current = 'menu'
 
-            GridLayout:
-                cols: 3
+            # time label
+            BoxLayout:
+                # take all the available space
+                size_hint:[1, 1]
 
-                Image:
-                    size_hint:[0.5, 0.5]
-                    source: "assets\\images\\coins.png"
+                id: time_label_color_id
 
-                Label:
-                    size_hint:[0.5, 0.5]
-                    text: "Hints"
+                canvas.before:
+                    Color:
+                        id: time_label_color_id
+                        rgba: [78.0 / 200, 220.0 / 255, 5.0 / 255, 1]
 
-                Label:
-                    size_hint:[0.5, 0.5]
-                    text: "Time"
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
 
-                Label:
-                    id: points_label_id
-                    text: "0"
-
-                Label:
-                    id: hints_label_id
-                    text: "0"
-
+                # pause time button
                 Button:
-                    id: time_label_id
-                    text: "00:00"
+                    id: time_button_id
+                    size_hint:[0.2,1]
+                    font_name: "assets\\fonts\\fontawesome-webfont.ttf"
+                    text: ""
+
+                    # invisible background
+                    background_color: [0] * 4
+
                     on_press: root.switch_pause_state()
 
+                Label:
+                    id: time_label_id
+                    text: "00:00"
+                    halign: 'center'
+
+            # display help
+            Button:
+                id: help_button_id
+
+                size_hint:[0.2, 1]
+
+                # invisible background
+                background_color: [0] * 4
+
+                canvas.before:
+                    Color:
+                        rgba: (1, 1, 1, 0.35)
+                    Line:
+                        circle: (help_button_id.center_x, help_button_id.center_y, min(help_button_id.width, help_button_id.height)   * 0.47)
+                        width: min(3, min(help_button_id.width, help_button_id.height) * 0.05)
+
+                font_name: "assets\\fonts\\fontawesome-webfont.ttf"
+                font_size: min(help_button_id.width,help_button_id.height) * 0.4
+                text: ""
+
+
+                on_press: root.switch_pause_state()
+
         # game board
-        GridLayout:
-            cols:3
+        FloatLayout:
             id: board_widget_id
             size_hint:[1, 0.55]
             spacing: self.width * 0.01
 
-        # info area
+        # points hints and lives
         BoxLayout:
-
             orientation: 'horizontal'
-            size_hint:[1, 0.25]
+            size_hint: [1, 0.2]
 
-            Image:
-                id: info_image_id
-                size_hint:[0.25, 1]
+            BoxLayout:
+                orientation: 'vertical'
 
+                canvas.before:
+                    Color:
+                        rgba: [106.0 / 255, 220.0 / 255, 165.0 / 255, 1]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
 
-            ScrollView:
-                size_hint:[0.75, 1]
+                Label:
+                    text: "Money"
+                CenteredLabel:
+                    id: points_label_id
+                    text: "0"
 
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint:[1, None]
+            BoxLayout:
+                id:author_button
+                orientation: 'vertical'
 
-                    AdjustableLabel:
-                        id: info_name_widget_id
-                        size_hint:[1,1]
-                        text: "La libertad guiando al pueblo"
+                canvas.before:
+                    Color:
+                        rgba: [203.0 / 255, 60.0 / 255, 81.0 / 255, 1]
 
-                    AdjustableLabel:
-                        id: info_descp_widget_id
-                        size_hint:[1,1]
-                        text: "Cuadro del pintor frances Eugène Delacroix"
+                    Rectangle:
+                        pos: author_button.pos[0] + 5 , author_button.pos[1] + 5
+                        size: author_button.width - 10, author_button.height - 10
+                canvas:
+                    Color:
+                        rgba: [1, 1, 1, 0.1]
+                    Line:
+                        rounded_rectangle: (author_button.pos[0], author_button.pos[1], author_button.width, author_button.height, 10, 50)
+                        width: 5
 
+                Label:
+                    text: "Lives"
+                CenteredLabel:
+                    id: lives_label_id
+                    text: "0"
+
+            BoxLayout:
+                orientation: 'vertical'
+
+                canvas.before:
+                    Color:
+                        rgba: [131.0 / 255, 60.0 / 255, 203.0 / 255, 1]
+
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+                Label:
+                    text: "Hints"
+
+                CenteredLabel:
+                    id: hints_label_id
+                    text: "0"

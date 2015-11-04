@@ -3,6 +3,25 @@
     background_down: 'assets\\images\\down.png'
     border: [30,30,30,30]
 
+
+
+
+<RoundedBox>:
+    on_pos: self.compute_points()
+    on_size: self.compute_points()
+    on_corners: self.compute_points()
+    on_resolution: self.compute_points()
+
+    canvas:
+        Line:
+            points: self.points
+            width: self.line_width
+
+
+<CenteredLabel@Label>:
+    valign: 'middle'
+    halign: 'center'
+
 <BackToMenuButton@RoundedButton>:
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
