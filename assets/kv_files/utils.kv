@@ -1,22 +1,32 @@
+#:import os os
+
 <RoundedButton@Button>:
-    background_normal: 'assets\\images\\normal.png'
-    background_down: 'assets\\images\\down.png'
-    border: [30,30,30,30]
+    background_color: [0] * 4
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "bttn_menu_border.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "bttn_menu_color.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "bttn_menu_int_shadow.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "bttn_menu_shine.png")
+            pos: self.pos
+            size: self.size
 
 
-
-
-<RoundedBox>:
-    on_pos: self.compute_points()
-    on_size: self.compute_points()
-    on_corners: self.compute_points()
-    on_resolution: self.compute_points()
-
-    canvas:
-        Line:
-            points: self.points
-            width: self.line_width
-
+<RobotoLabel@Label>:
+    font_name: os.path.join("assets","fonts","roboto_ligth.ttf")
 
 <CenteredLabel@Label>:
     valign: 'middle'
@@ -29,3 +39,83 @@
 # a label that adjust the text inside it
 <AdjustableLabel@Label>:
     text_size: self.parent.width, None
+
+<DisplayBoxBase@BoxLayout>:
+    id: display_box
+    back_color_img: "None"
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "display_border.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", display_box.back_color_img)
+            pos: self.pos
+            size: self.size
+
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "display_int_shadow.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "display_shine.png")
+            pos: self.pos
+            size: self.size
+
+<DisplayBox@DisplayBoxBase>:
+    orientation: 'vertical'
+
+<DisplayBoxHorizontal@DisplayBoxBase>:
+    orientation: 'horizontal'
+
+<RoundedLayoutBase@BoxLayout>:
+
+    id:rounded_layout
+    color: [203.0 / 255, 60.0 / 255, 81.0 / 255, 1]
+    radius_color: [1, 1, 1, 0.2]
+    line_radius_width: 5
+
+    canvas.before:
+        Color:
+            rgba: rounded_layout.color
+
+        Rectangle:
+            pos: self.pos[0] + self.size[0] / 4.0, self.pos[1]
+            size: self.size[0] / 2, self.size[1]
+
+        Ellipse:
+            pos: self.pos
+            size: self.size[0] / 2.0,self.size[1]
+
+        Ellipse:
+            pos: self.pos[0] + self.size[0] / 2.0, self.pos[1]
+            size: self.size[0] / 2.0,self.size[1]
+
+        Color:
+            rgba: rounded_layout.radius_color
+
+        Line:
+            points: [self.pos[0] + self.size[0] / 4.0, self.pos[1], self.pos[0] + self.size[0] * 3 / 4.0, self.pos[1]]
+            width: rounded_layout.line_radius_width
+
+        Line:
+            points: [self.pos[0] + self.size[0] / 4.0, self.pos[1] + self.size[1], self.pos[0] + self.size[0] * 3 / 4.0, self.pos[1] + self.size[1]]
+            width: rounded_layout.line_radius_width
+
+        Line:
+            ellipse: [self.pos[0], self.pos[1], self.size[0] / 2.0 , self.size[1] , 180, 360, 50]
+            width: rounded_layout.line_radius_width
+
+        Line:
+            ellipse: [self.pos[0] + self.size[0] / 2.0, self.pos[1], self.size[0] / 2.0,self.size[1] , 0, 180, 50]
+            width: rounded_layout.line_radius_width
+
+<RoundedLayout_Vertical@RoundedLayoutBase>:
+    orientation: 'vertical'
+
+<RoundedLayout_Horizontal@RoundedLayoutBase>:
+    orientation: 'horizontal'

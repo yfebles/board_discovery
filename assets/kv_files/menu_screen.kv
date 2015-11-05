@@ -5,6 +5,12 @@
 <MenuScreen>:
     id: menu_screen
 
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
+            pos: self.pos
+            size: self.size
+
     BoxLayout:
         orientation: 'vertical'
         spacing: self.height * 0.1
@@ -14,6 +20,7 @@
 
         RoundedButton:
             text: "Play"
+            background_color: [0] * 4
             on_press: app.screen_manager.current = 'play'
 
         RoundedButton:
@@ -28,16 +35,6 @@
             text: "Author"
             id: author_button
             on_press: app.screen_manager.current = 'author'
-
-            background_color: [0] * 4
-
-            canvas:
-
-                Color:
-                    rgba: [1, 1, 1, 0.1]
-                Line:
-                    rounded_rectangle: (author_button.pos[0], author_button.pos[1], author_button.width, author_button.height, 20, 50)
-                    width: 10
 
         RoundedButton:
             text: "Exit"
