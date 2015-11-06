@@ -267,22 +267,24 @@ class PlayScreen(Screen):
     def pause(self):
         self.game_paused = True
         self.time_button.text = ""
+        self.time_button.font_size = min(self.time_button.width, self.time_button.height) * 0.7
 
-    def play(self):
+    def play(self, dt=None):
+        # dt is the arg supplied by the clock timer call
         self.game_paused = False
         self.time_button.text = ""
+        self.time_button.font_size = min(self.time_button.width, self.time_button.height) * 0.8
 
     def on_leave(self, *args):
         self.pause()
 
     def on_enter(self, *args):
-
         # if no level has been played
         # if self.current_level is None:
         #     self.load_next_level()
 
         if self.game_paused:
-            self.play()
+            Clock.schedule_once(self.play, 1)
 
     # endregion
 

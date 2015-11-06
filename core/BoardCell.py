@@ -21,7 +21,7 @@ class BoardCell(Button):
 
     # endregion
 
-    def __init__(self, row, col, level_item, visible=False, selected=False, **kwargs):
+    def __init__(self, row=0, col=0, level_item=None, visible=False, selected=False, **kwargs):
         """
         :param row: the row of the bard cell at the board
         :param col: the col of the bard cell at the board
@@ -49,9 +49,9 @@ class BoardCell(Button):
         # if self.sound:
         #     self.sound.volume = 0.2
 
-        self.background_normal = self.NORMAL_BACKGROUND
+        # self.background_normal = self.NORMAL_BACKGROUND
 
-        self.level_item = level_item
+        # self.level_item = level_item
 
         self.visible = False
 

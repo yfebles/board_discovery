@@ -2,14 +2,11 @@
 #:include assets\kv_files\popups.kv
 #:import os os
 
-
 <PlayScreen>:
 
     id: play_screen
-
     points_lbl: points_label_id
     board_widget: board_widget_id
-
     time_lbl: time_label_id
     time_button: time_button_id
 
@@ -25,100 +22,104 @@
         orientation: 'vertical'
         pos: play_screen.width * 0.025, play_screen.height * 0.025
         size_hint: [0.95, 0.95]
-
+        spacing: play_screen.width * 0.02
 
         # top menu (menu, time and help)
         BoxLayout:
             id: top_menu
             orientation: 'horizontal'
-            size_hint: [1, 0.2]
+            size_hint: [1, 0.15]
             spacing: top_menu.width * 0.02
 
             # go to menu button
-            Button:
+            FunctionButton:
                 id: menu_button
-                size_hint:[0.2, 1]
+                size_hint:[0.25, 1]
                 font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
                 font_size: min(menu_button.width,menu_button.height) * 0.4
+                on_press: app.screen_manager.current = 'menu'
                 text: ""
 
-                canvas.before:
-                    Rectangle:
-                        source: os.path.join("assets","images","app_graphics", "function_btn_border.png")
-                        pos: self.pos[0] + self.size[0] / 4.0, self.pos[1] + self.size[1] / 4.0
-                        size: min(self.size[0] / 2.0, self.size[1] / 2.0),min(self.size[0] / 2.0, self.size[1] / 2.0)
-
-                # invisible background
-                background_color: [0] * 4
-
-                on_press: app.screen_manager.current = 'menu'
-
             # time box
-            DisplayBoxHorizontal:
+            BoxLayout:
 
-                id: time_box
-                size_hint:[1, 1]
+                padding: [0, (self.height - min(menu_button.size[0], menu_button.size[1])) / 2.25 ]
 
-                back_color_img: "display_color_time_box.png"
+                DisplayBoxHorizontal:
+                    id: time_box
 
-                padding: time_box.width * 0.02
 
-                # pause time button
-                Button:
-                    id: time_button_id
-                    size_hint:[0.3, 1]
-                    font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-                    font_size: min(time_button_id.width, time_button_id.height) * 0.8
-                    text: ""
+                    back_color_img: "display_color_time_box.png"
+                    padding: time_box.width * 0.02
+                    size_hint:[1,1]
 
-                    # invisible background
-                    background_color: [0] * 4
-                    on_press: root.switch_pause_state()
+                    # pause time button
+                    Button:
+                        id: time_button_id
+                        size_hint:[0.3, 1]
+                        font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+                        font_size: min(time_button_id.width, time_button_id.height) * 0.8
+                        text: ""
 
-                RobotoLabel:
-                    id: time_label_id
-                    size_hint:[0.65,1]
-                    halign: 'center'
-                    text: "00:00"
-                    font_size: min(time_button_id.width, time_button_id.height) * 0.7
+                        # invisible background
+                        background_color: [0] * 4
+                        on_press: root.switch_pause_state()
+
+                    RobotoLabel:
+                        id: time_label_id
+                        size_hint:[0.7,1]
+                        halign: 'center'
+                        text: "00:00"
+                        font_size: min(time_button_id.width, time_button_id.height) * 0.7
 
 
             # display help
-            Button:
+            FunctionButton:
                 id: help_button_id
-                size_hint:[0.2, 1]
-
-                # invisible background
-                background_color: [0] * 4
-
-                canvas.before:
-                    Color:
-                        rgba: (1, 1, 1, 0.35)
-                    Line:
-                        circle: (help_button_id.center_x, help_button_id.center_y, min(help_button_id.width, help_button_id.height)   * 0.47)
-                        width: min(3, min(help_button_id.width, help_button_id.height) * 0.05)
-
+                size_hint:[0.25, 1]
                 font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
                 font_size: min(help_button_id.width,help_button_id.height) * 0.4
                 text: ""
 
         # game board
-        FloatLayout:
+        GridLayout:
             id: board_widget_id
-            size_hint:[1, 0.55]
-            spacing: self.width * 0.01
+            size_hint:[1, 0.65]
+            spacing: self.width * 0.02
+
+            cols: 1
+            Description
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#
+#            BoardCell
+#            BoardCell
+#            BoardCell
+#            BoardCell
 
         # points hints and lives
         BoxLayout:
             id: info_points
             orientation: 'horizontal'
             spacing: info_points.width * 0.02
-
-            size_hint: [1, 0.2]
+            size_hint: [1, 0.15]
+            padding: [0, self.height / 8.0 ]
 
             DisplayBox:
                 back_color_img: "display_color_money.png"
-                size_hint: [0.5, 0.6]
+                size_hint: [0.6, 1]
 
                 RobotoLabel:
                     text: "MONEY"
@@ -130,7 +131,7 @@
             DisplayBox:
                 id:hints_box
                 back_color_img: "display_color_hints.png"
-                size_hint: [0.25, 0.6]
+                size_hint: [0.35, 1]
 
                 RobotoLabel:
                     text: "HINTS"
@@ -139,14 +140,14 @@
                     id: lives_label_id
                     text: "0"
 
-            DisplayBox:
-                id:lives_box
-                size_hint: [0.25, 0.6]
-                back_color_img: "display_color_lives.png"
-
-                RobotoLabel:
-                    text: "LIVES"
-
-                CenteredLabel:
-                    id: hints_label_id
-                    text: "0"
+#            DisplayBox:
+#                id:lives_box
+#                size_hint: [0.25, 0.6]
+#                back_color_img: "display_color_lives.png"
+#
+#                RobotoLabel:
+#                    text: "LIVES"
+#
+#                CenteredLabel:
+#                    id: hints_label_id
+#                    text: "0"

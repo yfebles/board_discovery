@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 #:include assets\kv_files\play_screen.kv
 #:include assets\kv_files\author_screen.kv
 #:include assets\kv_files\levels_screen.kv
@@ -13,29 +15,32 @@
 
     BoxLayout:
         orientation: 'vertical'
-        spacing: self.height * 0.1
-        size_hint: [0.5, 0.8]
-        pos: menu_screen.width * 0.25, menu_screen.height * 0.1
-
-
-        RoundedButton:
-            text: "Play"
-            background_color: [0] * 4
-            on_press: app.screen_manager.current = 'play'
+        spacing: self.height * 0.06
+        size_hint: [0.7, 0.7]
+        pos: menu_screen.width * 0.15, menu_screen.height * 0.15
 
         RoundedButton:
-            text: "Settings"
-            on_press: app.open_settings()
+            icon_text: ""
+            button_text: "Play"
+            on_touch_down: app.screen_manager.current = 'play'
 
         RoundedButton:
-            text: "Levels"
-            on_press: app.screen_manager.current = 'levels'
+            icon_text: ""
+            button_text: "Settings"
+            on_touch_down: app.open_settings()
 
         RoundedButton:
-            text: "Author"
+            icon_text: ""
+            button_text: "Levels"
+            on_touch_down: app.screen_manager.current = 'levels'
+
+        RoundedButton:
+            icon_text: ""
+            button_text: "Author"
             id: author_button
-            on_press: app.screen_manager.current = 'author'
+            on_touch_down: app.screen_manager.current = 'author'
 
         RoundedButton:
-            text: "Exit"
-            on_press: app.close()
+            icon_text: ""
+            button_text: "Exit"
+            on_touch_down: app.close()
