@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship, mapper
 
 Base = declarative_base()
 
-db_path = "" #os.path.join(os.getcwd(), "core", "levels", "orm")
+db_path = os.path.join(os.getcwd(), "core", "levels", "orm")
 
 
 

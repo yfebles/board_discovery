@@ -30,6 +30,7 @@ class PlayScreen(Screen):
 
     time_lbl = ObjectProperty()
     time_button = ObjectProperty()
+    time_box = ObjectProperty()
     time_color = ObjectProperty()
 
     item_name_lbl = ObjectProperty()
@@ -37,6 +38,8 @@ class PlayScreen(Screen):
     item_image = ObjectProperty()
 
     # endregion
+
+    TIME_FONT_RELATION = 0.8
 
     def __init__(self, *args, **kwargs):
         super(PlayScreen, self).__init__(*args, **kwargs)
@@ -267,13 +270,13 @@ class PlayScreen(Screen):
     def pause(self):
         self.game_paused = True
         self.time_button.text = ""
-        self.time_button.font_size = min(self.time_button.width, self.time_button.height) * 0.7
+        self.time_button.font_size = min(self.time_box.width, self.time_box.height) * self.TIME_FONT_RELATION * 0.9
 
     def play(self, dt=None):
         # dt is the arg supplied by the clock timer call
         self.game_paused = False
         self.time_button.text = ""
-        self.time_button.font_size = min(self.time_button.width, self.time_button.height) * 0.8
+        self.time_button.font_size = min(self.time_box.width, self.time_box.height) * self.TIME_FONT_RELATION
 
     def on_leave(self, *args):
         self.pause()
