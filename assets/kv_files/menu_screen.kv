@@ -20,27 +20,21 @@
         pos: menu_screen.width * 0.15, menu_screen.height * 0.15
 
         RoundedButton:
-            icon_text: ""
-            button_text: "Play"
-            on_touch_down: app.screen_manager.current = 'play'
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] Play[/size]"
+            on_press: app.screen_manager.current = 'play'
 
         RoundedButton:
-            icon_text: ""
-            button_text: "Settings"
-            on_touch_down: app.open_settings()
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] Settings[/size]"
+            on_press: app.open_settings()
 
         RoundedButton:
-            icon_text: ""
-            button_text: "Levels"
-            on_touch_down: app.screen_manager.current = 'levels'
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] Levels[/size]"
+            on_press: app.screen_manager.current = 'levels'
 
         RoundedButton:
-            icon_text: ""
-            button_text: "Author"
-            id: author_button
-            on_touch_down: app.screen_manager.current = 'author'
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] Author[/size]"
+            on_press: app.screen_manager.current = 'author'
 
         RoundedButton:
-            icon_text: ""
-            button_text: "Exit"
-            on_touch_down: app.close()
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] Exit[/size]"
+            on_press: app.close()

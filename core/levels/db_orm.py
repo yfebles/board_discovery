@@ -8,19 +8,16 @@ from sqlalchemy.orm import relationship, mapper
 
 Base = declarative_base()
 
-db_path = os.path.join(os.getcwd(), "core", "levels", "orm")
-
+db_path = os.path.join(os.getcwd(), "core", "levels")
 
 
 class ItemLevel(Base):
-
     __tablename__ = 'item_level'
     item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
     level_id = Column(Integer, ForeignKey('Level.level_id'), primary_key=True, nullable=False)
 
 
 class ItemTags(Base):
-
     __tablename__ = 'item_tags'
     item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey('Tags.tag_id'), primary_key=True, nullable=False)

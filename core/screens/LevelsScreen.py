@@ -5,12 +5,13 @@ from kivy.uix.screenmanager import Screen
 from core.levels.LevelManager import LevelManager
 
 
-class LevelsScreen(Screen):
+class LevelsScreen(Screen, EventDispatcher):
 
     levels_grid = ObjectProperty()
 
     def __init__(self, *args, **kwargs):
         super(LevelsScreen, self).__init__(*args, **kwargs)
+        super(EventDispatcher, self).__init__(*args, **kwargs)
 
         self.level_manager = LevelManager()
 

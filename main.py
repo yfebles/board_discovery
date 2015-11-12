@@ -55,6 +55,7 @@ class GameApp(App):
             print("errors changings " + ex.message)
 
     def load_level(self, obj, level):
+        print("asas")
         self.play_screen.pause()
         self.play_screen.load_level(level)
         self.screen_manager.current = 'play'

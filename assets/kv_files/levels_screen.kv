@@ -1,4 +1,6 @@
 #:include assets\kv_files\utils.kv
+#:import os os
+
 
 <LevelsScreen>:
     levels_grid: levels_grid_id
@@ -10,10 +12,9 @@
         # set a back image
         canvas.before:
             Rectangle:
-                pos: 0, 0
-                size: self.width, self.height
-                source: 'assets\\images\\level_back.jpg'
-
+                pos: self.pos
+                size: self.size
+                source: os.path.join("assets","images", "level_back.jpg")
 
         ScrollView:
             size_hint: [0.9, 0.9]

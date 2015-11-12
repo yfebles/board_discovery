@@ -42,14 +42,9 @@ class BoardCell(Button):
         # the selection state of the cell
         self._selected = selected
 
-        self._animate_back_image_index = 0
-        self.bricks_animation_images = [os.path.join('assets', 'images', 'brick_broke' + str(i) + '.png') for i in range(1, 5)]
-
         # self.sound = SoundLoader.load(self.SOUND_BRICKS)
         # if self.sound:
         #     self.sound.volume = 0.2
-
-        # self.background_normal = self.NORMAL_BACKGROUND
 
         # self.level_item = level_item
 
@@ -72,23 +67,7 @@ class BoardCell(Button):
 
     @visible.setter
     def visible(self, value):
-
-        if not value:
-            self.background_normal = self.NO_VISIBLE_BACKGROUND
-
-        if not self._visible and value:
-            self._animate_back_image_index = 0
-
-            Clock.schedule_interval(self.animate_back_image, 0.05)
-            Clock.schedule_interval(self.set_cell_content, 0.05 + len(self.bricks_animation_images) * 0.05)
-
-            # if self.sound:
-            #     self.sound.play()
-
         self._visible = value
-
-        if self.selected and not value:
-            self.selected = value
 
     # region Level Items Properties
 
@@ -117,16 +96,3 @@ class BoardCell(Button):
     @selected.setter
     def selected(self, value):
         self._selected = value
-
-    def animate_back_image(self, dt):
-        animation_on_going = self._animate_back_image_index < len(self.bricks_animation_images)
-
-        self.background_normal = self.bricks_animation_images[self._animate_back_image_index] if animation_on_going else self.NORMAL_BACKGROUND
-
-        self._animate_back_image_index += 1
-
-        return self._animate_back_image_index <= len(self.bricks_animation_images)
-
-
-
-

@@ -1,4 +1,4 @@
-from core.levels.orm.db_orm import DB, Level, Package, Statistics
+from core.levels.db_orm import DB, Level, Package, Statistics
 
 
 class LevelManager:

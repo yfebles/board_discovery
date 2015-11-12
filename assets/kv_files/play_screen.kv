@@ -7,13 +7,19 @@
     id: play_screen
     points_lbl: points_label_id
     board_widget: board_widget_id
+    help_button: help_button_id
+
     time_lbl: time_label_id
     time_button: time_button_id
+    time_box: time_box
 
+    back_image: "cristo.png"
+
+    game_paused: True
     canvas:
         Rectangle:
-            id: back_image
-            source: os.path.join("assets","images","cristo.png")
+            id: back_image_id
+            source: os.path.join("assets","images","items", play_screen.back_image)
             pos:self.pos
             size:self.size
 
@@ -35,31 +41,27 @@
             FunctionButton:
                 id: menu_button
                 size_hint:[0.25, 1]
-                font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
                 font_size: min(menu_button.width,menu_button.height) * 0.4
                 on_press: app.screen_manager.current = 'menu'
                 text: ""
 
             # time box
             BoxLayout:
-
                 padding: [0, (self.height - min(menu_button.size[0], menu_button.size[1])) / 2.25 ]
 
                 DisplayBoxHorizontal:
                     id: time_box
-
-
                     back_color_img: "display_color_time_box.png"
-                    padding: time_box.width * 0.02
-                    size_hint:[1,1]
+                    padding: time_box.width * 0.05
 
                     # pause time button
                     Button:
                         id: time_button_id
-                        size_hint:[0.3, 1]
+                        paused: play_screen.game_paused
+                        size_hint:[0.25, 1]
                         font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-                        font_size: min(time_button_id.width, time_button_id.height) * 0.8
-                        text: ""
+                        font_size: min(time_box.width, time_box.height) * (play_screen.TIME_FONT_RELATION if self.paused else 0.9)
+                        text: "" if self.paused else ""
 
                         # invisible background
                         background_color: [0] * 4
@@ -67,47 +69,23 @@
 
                     RobotoLabel:
                         id: time_label_id
-                        size_hint:[0.7,1]
+                        size_hint:[0.55,1]
                         halign: 'center'
                         text: "00:00"
-                        font_size: min(time_button_id.width, time_button_id.height) * 0.7
-
+                        font_size: min(time_box.width, time_box.height) * play_screen.TIME_FONT_RELATION
 
             # display help
             FunctionButton:
                 id: help_button_id
                 size_hint:[0.25, 1]
-                font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
                 font_size: min(help_button_id.width,help_button_id.height) * 0.4
                 text: ""
+                on_press: root.help_button_pressed()
 
         # game board
-        GridLayout:
+        FloatLayout:
             id: board_widget_id
             size_hint:[1, 0.65]
-            spacing: self.width * 0.02
-
-            cols: 1
-            Description
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#
-#            BoardCell
-#            BoardCell
-#            BoardCell
-#            BoardCell
 
         # points hints and lives
         BoxLayout:
@@ -142,7 +120,7 @@
 
 #            DisplayBox:
 #                id:lives_box
-#                size_hint: [0.25, 0.6]
+#                size_hint: [0.25, 1]
 #                back_color_img: "display_color_lives.png"
 #
 #                RobotoLabel:

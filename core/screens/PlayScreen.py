@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from math import sqrt
-from kivy.config import Config, ConfigParser
-from kivy.graphics.context_instructions import Color
-from kivy.graphics.vertex_instructions import Rectangle
+
 from kivy.uix.popup import Popup
-from core.BoardCell import BoardCell
+from kivy.animation import Animation
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty, Clock
+
+from core.BoardCell import BoardCell
+from core.levels.db_orm import DB
 from core.levels.LevelManager import LevelManager
-from core.levels.orm.db_orm import DB
+from core.DescriptionWidget import DescriptionWidget
 
 
 class GameWinPopup(Popup):
@@ -28,45 +29,42 @@ class PlayScreen(Screen):
     points_lbl = ObjectProperty()
     hints_lbl = ObjectProperty()
 
+    help_button = ObjectProperty()
+
     time_lbl = ObjectProperty()
-    time_button = ObjectProperty()
     time_box = ObjectProperty()
     time_color = ObjectProperty()
-
-    item_name_lbl = ObjectProperty()
-    item_descp_lbl = ObjectProperty()
-    item_image = ObjectProperty()
+    time_button = ObjectProperty()
 
     # endregion
 
     TIME_FONT_RELATION = 0.8
+    DESCP_SHOW_DELAY_TIME = 0.45
 
     def __init__(self, *args, **kwargs):
         super(PlayScreen, self).__init__(*args, **kwargs)
 
+        self.db = DB().get_db_session()
         self.level_manager = LevelManager()
 
-        self.db = DB().get_db_session()
+        self.help_widget = DescriptionWidget()
+        self.description_widget = DescriptionWidget()
 
-        # the colors to put in the time label when the game moves on
-        self.time_colors = []
+        self.description_widget.size_hint = [0, 0]
+
+        # animations
+        self.show_descp_animation = Animation(size_hint_y=1, size_hint_x=1, duration=self.DESCP_SHOW_DELAY_TIME)
+        self.hide_descp_animation = Animation(size_hint_y=0, size_hint_x=0, duration=self.DESCP_SHOW_DELAY_TIME)
+
+        # self.hide_descp_animation.bind(on_complete=self.)
 
         # Config Vars
-        self.sounds = True
-        self.effects = True
-        self.first_run = True
+        self.sounds, self.effects, self.first_run = [True] * 3
 
-        # the level currently being played
-        self.current_level = None
-
+        self.board = []
         self.game_paused = True
-
-        self.board = [[]]
-
-        # the cell to selected by user
         self.cell_selected = None
-
-        # region win & lose Popups
+        self.current_level = None
 
         self.lose_popup = GameLosePopup()
         self.lose_popup.pos = [self.width * 0.5, self.height * 0.5]
@@ -75,10 +73,6 @@ class PlayScreen(Screen):
         self.win_popup = GameWinPopup()
         self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
-
-        # endregion
-
-        # Clock.schedule_interval(self.update_time, 1)
 
     # region Properties
 
@@ -92,11 +86,11 @@ class PlayScreen(Screen):
 
     @property
     def hints(self):
-        return int(self.hints_lbl.text)
+        return 0
 
     @hints.setter
     def hints(self, hints_count):
-        self.hints_lbl.text = str(hints_count)
+        pass
 
     @property
     def time_sec(self):
@@ -139,28 +133,51 @@ class PlayScreen(Screen):
         un played level
         """
 
+        self.points = 0
         self.current_level = level
-        self.hints, self.points = 0, 0
-        # self.time_sec = level.time_seg
+        self.time_sec = level.time_seg
 
+        self.description_widget.clear()
         self.board_widget.clear_widgets()
-        self.update_info_widget()
 
         # items are a list of n**2 elements with n the size of the board
-        self.board_widget.cols = int(sqrt(len(level.items)))
+        cols = int(sqrt(len(level.items)))
 
-        cols = self.board_widget.cols
+        if cols < 2:
+            raise Exception("The board must have at least 2x2 cells")
 
-        self.board = []
+        self.board = [[] for _ in xrange(cols)]
 
         for i in xrange(cols):
-            self.board.append([])
-
             for j in xrange(cols):
+                board_cell = BoardCell(i, j, level.items[i * cols + j])
 
-                self.board[i].append(BoardCell(i, j, level.items[i * cols + j]))
-                self.board[i][j].bind(on_press=self.cell_pressed)
-                self.board_widget.add_widget(self.board[i][j])
+                # board[i][j]
+                self.board[i].append(board_cell)
+
+                self.board_widget.add_widget(board_cell)
+                board_cell.bind(on_press=self.cell_pressed)
+
+        self.update_cells_positions()
+
+    def update_cells_positions(self):
+        # in % from 0 to 1
+        spacing = 0.02
+
+        cols = len(self.board)
+        w, h = self.board_widget.width, self.board_widget.height
+
+        for i in xrange(cols):
+            for j in xrange(cols):
+                board_cell = self.board[i][j]
+
+                # updating the width and height on each cell including the spacing between them
+                board_cell.size_hint = [(1.0 - spacing * (cols -1)) / cols, (1.0 - spacing * (cols -1)) / cols]
+
+                x = self.board_widget.pos[0] + j * w / cols + spacing * w
+                y = self.board_widget.pos[1] + i * h / cols + spacing * h
+
+                board_cell.pos = x, y
 
     def load_next_level(self):
         next_level = self.level_manager.get_next_level(self.current_level)
@@ -192,28 +209,17 @@ class PlayScreen(Screen):
 
             Clock.schedule_once(self.win_popup.open, timeout=1)
 
-    def update_info_widget(self, board_cell=None):
-
-        name = "" if board_cell is None else board_cell.name
-        description = "" if board_cell is None else board_cell.description
-        image = "" if board_cell is None else board_cell.image
-
-        self.item_name_lbl.text = name
-        self.item_descp_lbl.text = description
-        self.item_image.source = image
-
     def cell_pressed(self, board_cell):
-
-        print(self.sounds, self.effects, self.first_run)
-
-        if not board_cell.visible or self.current_level is None or self.game_paused:
+        if self.current_level is None or self.game_paused:
             return
 
-        self.update_info_widget(board_cell)
+        if board_cell.visible:
+            self.description_widget.update(board_cell.name, board_cell.description, board_cell.image)
+            self.show_descp_widget(board_cell.center)
+            return
 
         # if no previous selection
         if self.cell_selected is None:
-
             board_cell.selected = True
             self.cell_selected = board_cell
             return
@@ -251,7 +257,7 @@ class PlayScreen(Screen):
         # directions up, down, left and right
         adjacent_cells = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
 
-        columns = self.board_widget.cols
+        columns = int(sqrt(len(self.current_level.items)))
 
         for row, col in adjacent_cells:
             if 0 <= row < columns and 0 <= col < columns and not self.board[row][col].visible:
@@ -269,14 +275,10 @@ class PlayScreen(Screen):
 
     def pause(self):
         self.game_paused = True
-        self.time_button.text = ""
-        self.time_button.font_size = min(self.time_box.width, self.time_box.height) * self.TIME_FONT_RELATION * 0.9
 
     def play(self, dt=None):
         # dt is the arg supplied by the clock timer call
         self.game_paused = False
-        self.time_button.text = ""
-        self.time_button.font_size = min(self.time_box.width, self.time_box.height) * self.TIME_FONT_RELATION
 
     def on_leave(self, *args):
         self.pause()
@@ -290,6 +292,36 @@ class PlayScreen(Screen):
             Clock.schedule_once(self.play, 1)
 
     # endregion
+
+    def help_button_pressed(self, bttn=None):
+        self.load_level(self.level_manager.levels[0])
+
+    def show_descp_widget(self, pos):
+        """
+        Shows the descp widget on the position supplied
+        :param pos: tuple of pos_x, pos_y
+        :return:
+        """
+
+        if self.description_widget in self.board_widget.children:
+            return
+
+        self.description_widget.pos = pos
+        self.board_widget.add_widget(self.description_widget)
+
+        show_animation = Animation(x=self.board_widget.pos[0], y=self.board_widget.pos[1], duration=self.DESCP_SHOW_DELAY_TIME)
+        show_animation &= self.show_descp_animation
+        show_animation.start(self.description_widget)
+
+    def hide_descp_widget(self):
+        if self.description_widget not in self.board_widget.children:
+            return
+
+        self.hide_descp_animation.start(self.description_widget)
+
+    def update_(self):
+        self.board_widget.remove_widget(self.description_widget)
+        self.description_widget.pos = self.board_widget.pos
 
     def update_time(self, dt):
         # if pause nothing to do

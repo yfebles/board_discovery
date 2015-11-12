@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
 
-import os
-from kivy.animation import Animation, AnimationTransition
-from kivy.graphics.context_instructions import Color
-from kivy.graphics.vertex_instructions import Rectangle
-from kivy.properties import ObjectProperty, Clock
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ObjectProperty
+from kivy.uix.floatlayout import FloatLayout
+from kivy.animation import Animation, AnimationTransition
+
+# region Helper Classes
+
+class ColoredLabel(Label):
+
+    def __init__(self, **kwargs):
+        Label.__init__(self, **kwargs)
 
 
 class DescriptionName(BoxLayout):
 
     def __init__(self, **kwargs):
         BoxLayout.__init__(self, **kwargs)
+
+# endregion
 
 
 class DescriptionWidget(FloatLayout):
@@ -39,7 +45,7 @@ class DescriptionWidget(FloatLayout):
         self.detail_descp_name = DescriptionName()
         self.detail_descp_name.transparency = 0.5
         self.detail_descp_name.size_hint = [1, 0.15]
-        self.detail_descp_label = Label()
+        self.detail_descp_label = ColoredLabel()
 
         self.hide_descp_update()
         self.descp_widget.size_hint = [0.95, 0.001]
@@ -78,13 +84,10 @@ class DescriptionWidget(FloatLayout):
         self.detail_descp_name.name = self.name_widget.name
         self.detail_descp_name.button_text = ""
         self.detail_descp_label.text = "Hello"
-
-        # self.detail_descp_label.canvas.before.clear()
-        with self.detail_descp_label.canvas.before:
-            Color(0, 0, 0, 0.5)
-            Rectangle(pos=self.descp_widget.pos, size=self.descp_widget.size)
-
         self.add_widget(self.descp_widget)
 
-    def load_item(self, item):
+    def clear(self):
+        self.update("", "", "")
+
+    def update(self, name, descp, image):
         pass

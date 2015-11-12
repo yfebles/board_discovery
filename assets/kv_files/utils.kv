@@ -1,17 +1,8 @@
 #:import os os
 
-<Transparent@Widget>:
+<RoundedButton@Button>:
     background_color: [0] * 4
-
-# all the menu buttons
-<RoundedButton@BoxLayout>:
-    id: round_button
-    orientation: "horizontal"
-    icon_text: " "
-    button_text: " "
-    spacing: self.width * 0.1
-    padding: self.width * 0.05
-
+    markup: True
 
     canvas.before:
         Rectangle:
@@ -34,20 +25,6 @@
             pos: self.pos
             size: self.size
 
-    Label:
-        size_hint: [0.4 ,1]
-        font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-        font_size: min(round_button.width, round_button.height) * 0.65
-        text: round_button.icon_text
-
-    Label:
-        size_hint: [0.6 ,1]
-        font_name: os.path.join("assets","fonts","roboto_black.ttf")
-        font_size: min(round_button.width, round_button.height) * 0.65
-        text: round_button.button_text
-
-
-
 
 <RobotoLabel@Label>:
     font_name: os.path.join("assets","fonts","roboto_ligth.ttf")
@@ -58,7 +35,7 @@
 
 <BackToMenuButton@RoundedButton>:
     text: 'Menu'
-#    on_press: app.screen_manager.current = 'menu'
+    on_press: app.screen_manager.current = 'menu'
 
 # a label that adjust the text inside it
 <AdjustableLabel@Label>:
@@ -95,8 +72,12 @@
 <DisplayBoxHorizontal@DisplayBoxBase>:
     orientation: 'horizontal'
 
+<Transparent@Widget>:
+    background_color: [0] *4
 
 <FunctionButton@Button+Transparent>:
+    font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+
     canvas.before:
         Rectangle:
             source: os.path.join("assets","images","app_graphics", "function_btn_border.png")
@@ -108,7 +89,7 @@
 
     font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
     font_size: min(self.width, self.height) * 0.65
-    
+    background_color:[0]*4
     text: ""
 
     canvas.before:
@@ -132,12 +113,60 @@
             pos: self.pos
             size: self.size
 
-<Description@BoxLayout>:
-    id: description_widget
-    orientation: "vertical"
-    size_hint: [1, 1]
+<ColoredLabel@Label>:
+    id: colored_label
+
+    transparency: 0.5
+
+    canvas.before:
+        Color:
+            rgba: [0,0,0, colored_label.transparency]
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<DescriptionName@BoxLayout>:
+    id: descp_name
+    orientation: "horizontal"
+    name: "Android"
+    button_text: ""
+    button_callback: None
+    transparency: 0.0
+
+    canvas.before:
+        Color:
+            rgba: [0,0,0, descp_name.transparency]
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    CenteredLabel:
+        id:item_name_lbl_id
+        size_hint: [0.8, 1]
+        font_name: os.path.join("assets","fonts","roboto_black.ttf")
+        font_size: min(self.height * 0.8 ,self.width * 0.08)
+        text: descp_name.name
+
+    Button:
+        id: open_descp_bttn
+        size_hint: [0.2, 1]
+        background_color: [0] * 4
+        font_size: self.height * 0.4
+        markup: True
+        font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+
+        text: "[color=#ffa200] " + descp_name.button_text + " [/color]"
+        font_size: self.width * 0.5
+        on_press: descp_name.button_callback() if descp_name.button_callback is not None else None
+
+<DescriptionWidget@FloatLayout>:
+
+    id:description_widget
     image: "android.jpg"
-    padding: [0 , self.height * 0.85, 0, 0]
+
+    name_widget: item_name
 
     canvas.before:
         Rectangle:
@@ -150,27 +179,11 @@
             pos: self.pos
             size: self.size
 
-        Rectangle:
-            source: os.path.join("assets", "images", "app_graphics", "name_label_back_item_cell.png")
-            pos: self.pos
-            size: self.size
-
-
-    CenteredLabel:
-        id:item_name_lbl_id
-        size_hint: [1, 1]
-        pos: description_widget.size[0] * 0.1,  description_widget.size[1] * 0.1
-        font_name: os.path.join("assets","fonts","roboto_black.ttf")
-        font_size: self.height * 0.4
-
-        text: "Android"
-
-    CenteredLabel:
-        size_hint: [1, 1]
-
-        markup: True
-        font_size: self.height * 0.4
-        font_name: os.path.join("assets","fonts","roboto_black.ttf")
-        text: "  "
-
-
+    DescriptionName:
+        id: item_name
+        size_hint: [0.95, 0.15]
+        transparency: 0.5
+        pos: description_widget.pos[0] + description_widget.width * 0.025, description_widget.pos[1] + description_widget.height * 0.025
+        name: "Android System"
+        button_text: ""
+        button_callback: description_widget.show_descp
