@@ -2,7 +2,7 @@ from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import Screen
-from core.levels.LevelManager import LevelManager
+from core.LevelManager import LevelManager
 
 
 class LevelsScreen(Screen, EventDispatcher):
@@ -25,11 +25,9 @@ class LevelsScreen(Screen, EventDispatcher):
 
         # load the levels as
         for index, level in enumerate(self.level_manager.levels):
-            text = "X" if level.blocked else str(index + 1)
+            text = str(index + 1)
 
-            on_press_event = lambda obj: None if level.blocked else self.raise_open_level(index)
-
-            self.levels_grid.add_widget(Button(text=text, size_hint_y=None, on_press=on_press_event))
+            self.levels_grid.add_widget(Button(text=text, size_hint_y=None, on_press=self.raise_open_level(index)))
 
     def raise_open_level(self, index):
         return lambda obj: self.dispatch("on_open_level", self.level_manager.levels[index])

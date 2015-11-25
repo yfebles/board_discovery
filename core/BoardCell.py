@@ -1,9 +1,8 @@
 import os
-from kivy.animation import Animation
-from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 from kivy.graphics.vertex_instructions import Rectangle
 from kivy.uix.button import Button
+from kivy.animation import Animation, AnimationTransition
 
 
 class BoardCell(Button):
@@ -13,15 +12,14 @@ class BoardCell(Button):
 
     # region CONSTANTS
 
-    SOUND_BRICKS = os.path.join('assets', 'sounds', 'broke_brick.wav')
+    DESCP_SHOW_DELAY_TIME = 0.4
     IMG_PATH = os.path.join('assets', 'images', 'items')
-    NO_VISIBLE_BACKGROUND = os.path.join('assets', 'images', 'bricks.png')
-    NORMAL_BACKGROUND = os.path.join('assets', 'images', 'normal.png')
-    SELECTED_BACKGROUND = os.path.join('assets', 'images', 'down.png')
+    FLIP_SOUND = os.path.join('assets', 'sounds', 'flip_sound.wav')
+    BORDER_IMAGE = os.path.join("assets", "images", "app_graphics", "board_btn_border.png")
 
     # endregion
 
-    def __init__(self, row=0, col=0, level_item=None, visible=False, selected=False, **kwargs):
+    def __init__(self, level_item, row=0, col=0, **kwargs):
         """
         :param row: the row of the bard cell at the board
         :param col: the col of the bard cell at the board
@@ -33,33 +31,18 @@ class BoardCell(Button):
 
         self.row, self.col = row, col
 
-        # the visibility state of the cell
-        self._visible = visible
+        # visibility, active and selection state of the cell
+        self._visible, self._active, self._selected, self.animation_ongoing = [False] * 4
 
-        # if the cell is active to be used
-        self._active = True
+        self.flip_animation = None
 
-        # the selection state of the cell
-        self._selected = selected
+        sound = SoundLoader.load(self.FLIP_SOUND)
 
-        # self.sound = SoundLoader.load(self.SOUND_BRICKS)
-        # if self.sound:
-        #     self.sound.volume = 0.2
+        self.flip_sound = None if not sound else sound
 
-        # self.level_item = level_item
+        self.level_item = level_item
 
-        self.visible = False
-
-    def set_cell_content(self, obj):
-        """
-        Set the content of a cell after make it visible
-        :param obj:
-        :return:
-        """
-        if self.level_item.image:
-            self.background_normal = os.path.join(self.IMG_PATH, self.level_item.image)
-        else:
-            self.text = self.level_item.name
+        self.item_image_canvas_instruction = []
 
     @property
     def visible(self):
@@ -67,7 +50,14 @@ class BoardCell(Button):
 
     @visible.setter
     def visible(self, value):
+        if self._visible == value:
+            return
+
         self._visible = value
+        if self.flip_sound and value:
+            self.flip_sound.play()
+
+        self.flip()
 
     # region Level Items Properties
 
@@ -77,17 +67,20 @@ class BoardCell(Button):
 
     @property
     def description(self):
-        return self.level_item.description
+        descp = self.level_item.description
+        return "" if descp is None else descp
 
     @property
     def image(self):
-        return os.path.join(self.IMG_PATH, self.level_item.image)
+        return os.path.join(self.IMG_PATH, "naranja.jpg" if not self.level_item.image else self.level_item.image)
 
     # endregion
 
+    # region Future Use
+
     @property
     def active(self):
-        return self.level_item.active
+        return self._active
 
     @property
     def selected(self):
@@ -96,3 +89,38 @@ class BoardCell(Button):
     @selected.setter
     def selected(self, value):
         self._selected = value
+
+    # endregion
+
+    def release_animation(self, obj=None, button=None):
+        self.animation_ongoing = False
+
+    def between_flip_change(self, obj=None, button=None):
+        if self.visible:
+            for instruction in self.item_image_canvas_instruction:
+                self.canvas.after.add(instruction)
+        else:
+            self.canvas.after.clear()
+
+    def flip(self):
+        if self.animation_ongoing:
+            return
+
+        self.animation_ongoing = True
+
+        old_x = self.pos[0]
+        old_width = self.size_hint_x
+
+        self.item_image_canvas_instruction = []
+        self.item_image_canvas_instruction.append(Rectangle(source=self.image, pos=self.pos, size=self.size))
+        self.item_image_canvas_instruction.append(Rectangle(source=self.BORDER_IMAGE, pos=self.pos, size=self.size))
+
+        self.flip_animation = Animation(size_hint_x=0, x=old_x + self.width / 2, duration=self.DESCP_SHOW_DELAY_TIME / 2)
+
+        self.flip_animation.bind(on_complete=self.between_flip_change)
+
+        self.flip_animation += Animation(size_hint_x=old_width, x=old_x, duration=self.DESCP_SHOW_DELAY_TIME / 2)
+        self.flip_animation.bind(on_complete=self.release_animation)
+
+        self.flip_animation.start(self)
+

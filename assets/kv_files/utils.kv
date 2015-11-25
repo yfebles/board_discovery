@@ -89,7 +89,7 @@
 
     font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
     font_size: min(self.width, self.height) * 0.65
-    background_color:[0]*4
+    background_color:[0] * 4
     text: ""
 
     canvas.before:
@@ -134,6 +134,7 @@
     button_callback: None
     transparency: 0.0
 
+
     canvas.before:
         Color:
             rgba: [0,0,0, descp_name.transparency]
@@ -146,8 +147,9 @@
         id:item_name_lbl_id
         size_hint: [0.8, 1]
         font_name: os.path.join("assets","fonts","roboto_black.ttf")
-        font_size: min(self.height * 0.8 ,self.width * 0.08)
         text: descp_name.name
+        font_size: min(self.height * 0.8 ,self.width * 0.08)
+
 
     Button:
         id: open_descp_bttn
@@ -164,7 +166,7 @@
 <DescriptionWidget@FloatLayout>:
 
     id:description_widget
-    image: "android.jpg"
+    image:  os.path.join("assets", "images", "items", "android.jpg")
 
     name_widget: item_name
 
@@ -175,7 +177,7 @@
             size: self.size
 
         Rectangle:
-            source: os.path.join("assets", "images", "items", self.image)
+            source: self.image
             pos: self.pos
             size: self.size
 

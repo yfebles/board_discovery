@@ -1,4 +1,4 @@
-from core.levels.db_orm import DB, Level, Package, Statistics
+from core.db_orm import DB, Level, Package, Statistics
 
 
 class LevelManager:
@@ -20,6 +20,7 @@ class LevelManager:
 
         def _get_db_data(self, entity):
             try:
+
                 return self.db.query(entity).all()
 
             except Exception as e:
@@ -46,7 +47,7 @@ class LevelManager:
             """
             try:
 
-                self.db.add(Statistics(level=level, points= points))
+                self.db.add(Statistics(level=level, points=points))
                 self.db.commit()
 
             except Exception as ex:
@@ -71,3 +72,5 @@ class LevelManager:
     def __setattr__(self, attr, value):
         """ Delegate access to singleton """
         return setattr(self.__instance, attr, value)
+
+

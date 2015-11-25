@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from math import sqrt
-
+from db.db_orm import DB
+from core.LevelManager import LevelManager
 from kivy.uix.popup import Popup
-from kivy.animation import Animation
+from kivy.animation import Animation, AnimationTransition
+from core.BoardCell import BoardCell
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty, Clock
-
-from core.BoardCell import BoardCell
-from core.levels.db_orm import DB
-from core.levels.LevelManager import LevelManager
 from core.DescriptionWidget import DescriptionWidget
 
+import random
 
 class GameWinPopup(Popup):
     continue_playing_bttn = ObjectProperty()
@@ -38,6 +37,9 @@ class PlayScreen(Screen):
 
     # endregion
 
+    # In several methods an argument dt is supplied
+    # cause are methods called from a clock timer schedule
+
     TIME_FONT_RELATION = 0.8
     DESCP_SHOW_DELAY_TIME = 0.45
 
@@ -56,25 +58,41 @@ class PlayScreen(Screen):
         self.show_descp_animation = Animation(size_hint_y=1, size_hint_x=1, duration=self.DESCP_SHOW_DELAY_TIME)
         self.hide_descp_animation = Animation(size_hint_y=0, size_hint_x=0, duration=self.DESCP_SHOW_DELAY_TIME)
 
-        # self.hide_descp_animation.bind(on_complete=self.)
+        self.time_label_colors = [(78, 200, 5, 1),
+                                  (78, 100, 5, 1),
+                                  (78, 0, 5, 1),
+                                  (78, 200, 105, 1)]
+
+        self.pause_animation = Animation(opacity=0, duration=0.8) + Animation(opacity=1, duration=0.8)
+        self.pause_animation.repeat = True
+
+        self.hide_descp_animation.bind(on_complete=self.remove_descp_widget)
 
         # Config Vars
-        self.sounds, self.effects, self.first_run = [True] * 3
+        self.sounds, self.effects, self.first_run, self.game_paused = [True] * 4
 
         self.board = []
-        self.game_paused = True
-        self.cell_selected = None
-        self.current_level = None
+        self.cell_selected, self.second_cell_selected, self.current_level = [None] * 3
+
+        self.pairing_cells_on_going = False
 
         self.lose_popup = GameLosePopup()
         self.lose_popup.pos = [self.width * 0.5, self.height * 0.5]
         self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level))
 
         self.win_popup = GameWinPopup()
-        self.win_popup.pos = [self.width * 0.5, self.height * 0.5]
+        self.win_popup.pos = [self.width * 0.75, self.height * 0.75]
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
+        self.description_widget.bind(on_hide=self.hide_descp_widget)
+
+        Clock.schedule_interval(self.update_time, timeout=1)
+
     # region Properties
+
+    @property
+    def columns(self):
+        return 0 if self.current_level is None else int(sqrt(len(self.current_level.items)))
 
     @property
     def points(self):
@@ -112,6 +130,13 @@ class PlayScreen(Screen):
 
         self.time_lbl.text = minutes_str + ":" + str(seconds_str)
 
+        # there is 4 images to show for time color changing
+        index = time_sec_count * 4 / self.current_level.time_seg
+        img_src = "display_color_time_box{0}.png".format(1 + index)
+
+        if index < 4 and img_src != self.time_box.back_color_img:
+            self.time_box.back_color_img = img_src
+
     # endregion
 
     # region Level Handling
@@ -132,25 +157,23 @@ class PlayScreen(Screen):
         :param level: the level supplied (if any) else try to load the next
         un played level
         """
-
-        self.points = 0
         self.current_level = level
-        self.time_sec = level.time_seg
 
-        self.description_widget.clear()
-        self.board_widget.clear_widgets()
-
-        # items are a list of n**2 elements with n the size of the board
-        cols = int(sqrt(len(level.items)))
-
+        cols = self.columns
         if cols < 2:
             raise Exception("The board must have at least 2x2 cells")
+
+        self.points = 0
+        self.time_sec = level.time_seg
+
+        self.board_widget.clear_widgets()
+        self.cell_selected, self.second_cell_selected = [None] * 2
 
         self.board = [[] for _ in xrange(cols)]
 
         for i in xrange(cols):
             for j in xrange(cols):
-                board_cell = BoardCell(i, j, level.items[i * cols + j])
+                board_cell = BoardCell(level.items[i * cols + j], i, j)
 
                 # board[i][j]
                 self.board[i].append(board_cell)
@@ -159,32 +182,34 @@ class PlayScreen(Screen):
                 board_cell.bind(on_press=self.cell_pressed)
 
         self.update_cells_positions()
+        self.hide_descp_widget()
+        self.play()
 
     def update_cells_positions(self):
-        # in % from 0 to 1
+        cols = self.columns
+
+        # spacing between cells in % from 0 to 1
         spacing = 0.02
 
-        cols = len(self.board)
         w, h = self.board_widget.width, self.board_widget.height
+        x_base = self.board_widget.pos[0] + self.board_widget.width * spacing / 2
+        y_base = self.board_widget.pos[1] + self.board_widget.height * spacing / 2
 
         for i in xrange(cols):
             for j in xrange(cols):
                 board_cell = self.board[i][j]
 
-                # updating the width and height on each cell including the spacing between them
-                board_cell.size_hint = [(1.0 - spacing * (cols -1)) / cols, (1.0 - spacing * (cols -1)) / cols]
+                # updating the width and height on each cell including the spacing between them in % from 0 to 1 of the parent
+                board_cell.size_hint = [(1.0 - spacing * (cols - 1)) / cols, (1.0 - spacing * (cols - 1)) / cols]
 
-                x = self.board_widget.pos[0] + j * w / cols + spacing * w
-                y = self.board_widget.pos[1] + i * h / cols + spacing * h
-
-                board_cell.pos = x, y
+                board_cell.pos = x_base + j * w / cols, y_base + i * h / cols
 
     def load_next_level(self):
         next_level = self.level_manager.get_next_level(self.current_level)
 
         if next_level is None:
-            self.clear_widgets()
-            Clock.schedule_once(self.win_popup.open, timeout=1)
+            # self.clear_widgets()
+            Clock.schedule_once(self.win_popup.open, timeout=0.5)
 
         self.load_level(next_level)
 
@@ -199,9 +224,10 @@ class PlayScreen(Screen):
         :return:
         """
         # the game is wined if all the cells are visible
-        columns = self.board_widget.cols
 
-        all_visible = all([self.board[i][j].visible for i in xrange(columns) for j in xrange(columns)])
+        all_visible = all([self.board[i][j].visible
+                           for i in xrange(self.columns)
+                           for j in xrange(self.columns)])
 
         if all_visible:
             # game win animation
@@ -210,41 +236,56 @@ class PlayScreen(Screen):
             Clock.schedule_once(self.win_popup.open, timeout=1)
 
     def cell_pressed(self, board_cell):
-        if self.current_level is None or self.game_paused:
+        if self.pairing_cells_on_going or self.current_level is None or self.game_paused or self.is_descp_visible():
             return
 
         if board_cell.visible:
-            self.description_widget.update(board_cell.name, board_cell.description, board_cell.image)
-            self.show_descp_widget(board_cell.center)
+            self.show_descp_widget(board_cell.center, board_cell)
             return
 
-        # if no previous selection
+        board_cell.visible = True
+
+        # if no un-paired cell is visible (just visible the already paired)
         if self.cell_selected is None:
-            board_cell.selected = True
             self.cell_selected = board_cell
             return
 
-        else:
-            # check if the two cells are related
-            row_1, col_1 = self.cell_selected.row, self.cell_selected.col
-            row_2, col_2 = board_cell.row, board_cell.col
+        # if the two cells are not related hide them
+        if not self.are_connected(self.cell_selected, board_cell):
+            self.pairing_cells_on_going = True
+            self.second_cell_selected = board_cell
+            Clock.schedule_once(self.pair_cells_failed_restore, timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.2)
+            return
 
-            columns = self.board_widget.cols
+        # if related cells
+        self.points += self.current_level.points
 
-            # the position in the relations level matrix
-            cell_1_position = row_1 * columns + col_1
-            cell_2_position = row_2 * columns + col_2
-
-            # if the two cells are related
-            if self.current_level.are_connected(cell_1_position, cell_2_position):
-                self.discover_cells(row_1, col_1)
-                self.discover_cells(row_2, col_2)
-
-            self.cell_selected.selected = False
-            self.cell_selected = None
+        self.cell_selected = None
 
         # check if the game has been wined
         self.check_game_state()
+
+    def are_connected(self, cell1, cell2):
+        """
+        Method that checks the connection between the two supplied cells
+        on the current level
+        :param cell1: The first Board Cell to check
+        :param cell2: The second Board Cell to check
+        :return: True if connected on the level False otherwise
+        """
+        # the indexed in the  level items list
+        cell_1_index = cell1.row * self.columns + cell1.col
+        cell_2_index = cell2.row * self.columns + cell2.col
+
+        return self.current_level.are_connected(cell_1_index, cell_2_index)
+
+    def pair_cells_failed_restore(self, obj=None):
+
+        self.second_cell_selected.visible = False
+        self.cell_selected.visible = False
+        self.cell_selected = None
+
+        self.pairing_cells_on_going = False
 
     def discover_cells(self, i, j):
         """
@@ -257,10 +298,8 @@ class PlayScreen(Screen):
         # directions up, down, left and right
         adjacent_cells = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
 
-        columns = int(sqrt(len(self.current_level.items)))
-
         for row, col in adjacent_cells:
-            if 0 <= row < columns and 0 <= col < columns and not self.board[row][col].visible:
+            if 0 <= row < self.columns and 0 <= col < self.columns and not self.board[row][col].visible:
                 self.points += self.current_level.points
                 self.board[row][col].visible = True
                 return
@@ -273,55 +312,71 @@ class PlayScreen(Screen):
         action = self.play if self.game_paused else self.pause
         action()
 
-    def pause(self):
+    def pause(self, dt=None):
         self.game_paused = True
+        self.pause_animation.start(self.time_lbl)
 
     def play(self, dt=None):
-        # dt is the arg supplied by the clock timer call
         self.game_paused = False
+
+        self.pause_animation.cancel(self.time_lbl)
+        self.time_lbl.opacity = 1
 
     def on_leave(self, *args):
         self.pause()
 
     def on_enter(self, *args):
         # if no level has been played
-        # if self.current_level is None:
-        #     self.load_next_level()
+        if self.current_level is None:
+            self.load_next_level()
 
         if self.game_paused:
             Clock.schedule_once(self.play, 1)
 
     # endregion
 
-    def help_button_pressed(self, bttn=None):
-        self.load_level(self.level_manager.levels[0])
+    # region Description And Help
 
-    def show_descp_widget(self, pos):
+    def is_descp_visible(self):
+        return self.description_widget in self.board_widget.children
+
+    def help_button_pressed(self, bttn=None):
+        self.hide_descp_widget(animation=False)
+
+    def show_descp_widget(self, pos, board_cell):
         """
         Shows the descp widget on the position supplied
         :param pos: tuple of pos_x, pos_y
         :return:
         """
+        if not self.is_descp_visible():
+            self.description_widget.update(board_cell)
+            self.description_widget.pos = pos
+            self.board_widget.add_widget(self.description_widget)
 
-        if self.description_widget in self.board_widget.children:
-            return
+            # stop the game timer when the description is visible
+            Clock.schedule_once(self.pause, timeout=self.DESCP_SHOW_DELAY_TIME * 1.1)
 
-        self.description_widget.pos = pos
-        self.board_widget.add_widget(self.description_widget)
+            show_animation = Animation(x=self.board_widget.pos[0], y=self.board_widget.pos[1], duration=self.DESCP_SHOW_DELAY_TIME)
+            show_animation &= self.show_descp_animation
+            show_animation.start(self.description_widget)
 
-        show_animation = Animation(x=self.board_widget.pos[0], y=self.board_widget.pos[1], duration=self.DESCP_SHOW_DELAY_TIME)
-        show_animation &= self.show_descp_animation
-        show_animation.start(self.description_widget)
+    def hide_descp_widget(self, obj=None, animation=True):
+        if self.is_descp_visible():
+            self.description_widget.hide_descp(animation)
 
-    def hide_descp_widget(self):
-        if self.description_widget not in self.board_widget.children:
-            return
+            # start the game timer when the description is hide
+            Clock.schedule_once(self.play, timeout=self.DESCP_SHOW_DELAY_TIME * 1.1)
 
-        self.hide_descp_animation.start(self.description_widget)
+            hide_animation = Animation(center=self.board_widget.center, duration=self.DESCP_SHOW_DELAY_TIME)
+            hide_animation &= self.hide_descp_animation
+            hide_animation.start(self.description_widget)
 
-    def update_(self):
+    def remove_descp_widget(self, obj=None, button=None):
         self.board_widget.remove_widget(self.description_widget)
         self.description_widget.pos = self.board_widget.pos
+
+    # endregion
 
     def update_time(self, dt):
         # if pause nothing to do
@@ -335,7 +390,7 @@ class PlayScreen(Screen):
             self.pause()
 
             # game lose animation
-            Clock.schedule_once(self.lose_popup.open, timeout=1)
+            Clock.schedule_once(self.lose_popup.open, timeout=0.5)
 
         self.time_sec = current_time
 

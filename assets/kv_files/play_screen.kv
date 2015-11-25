@@ -13,13 +13,13 @@
     time_button: time_button_id
     time_box: time_box
 
-    back_image: "cristo.png"
+    back_image: "menu_back.jpg"
 
     game_paused: True
     canvas:
         Rectangle:
             id: back_image_id
-            source: os.path.join("assets","images","items", play_screen.back_image)
+            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
             pos:self.pos
             size:self.size
 
@@ -40,7 +40,7 @@
             # go to menu button
             FunctionButton:
                 id: menu_button
-                size_hint:[0.25, 1]
+                size_hint:[0.24, 1]
                 font_size: min(menu_button.width,menu_button.height) * 0.4
                 on_press: app.screen_manager.current = 'menu'
                 text: ""
@@ -51,7 +51,7 @@
 
                 DisplayBoxHorizontal:
                     id: time_box
-                    back_color_img: "display_color_time_box.png"
+                    back_color_img: "display_color_time_box4.png"
                     padding: time_box.width * 0.05
 
                     # pause time button
@@ -60,7 +60,7 @@
                         paused: play_screen.game_paused
                         size_hint:[0.25, 1]
                         font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-                        font_size: min(time_box.width, time_box.height) * (play_screen.TIME_FONT_RELATION if self.paused else 0.9)
+                        font_size: min(time_box.width, time_box.height) * (0.7 if self.paused else 0.9)
                         text: "" if self.paused else ""
 
                         # invisible background
@@ -77,7 +77,7 @@
             # display help
             FunctionButton:
                 id: help_button_id
-                size_hint:[0.25, 1]
+                size_hint:[0.24, 1]
                 font_size: min(help_button_id.width,help_button_id.height) * 0.4
                 text: ""
                 on_press: root.help_button_pressed()
@@ -86,6 +86,8 @@
         FloatLayout:
             id: board_widget_id
             size_hint:[1, 0.65]
+            pos: play_screen.width * 0.025, play_screen.height * 0.025
+            on_size: play_screen.update_cells_positions()
 
         # points hints and lives
         BoxLayout:
@@ -98,18 +100,21 @@
             DisplayBox:
                 back_color_img: "display_color_money.png"
                 size_hint: [0.6, 1]
+                padding: [0,0,0, self.height/20]
 
                 RobotoLabel:
                     text: "MONEY"
 
                 CenteredLabel:
                     id: points_label_id
+                    font_size: min(self.width / 5 ,self.height * 0.8)
                     text: "0000"
 
             DisplayBox:
                 id:hints_box
                 back_color_img: "display_color_hints.png"
                 size_hint: [0.35, 1]
+                padding: [0,0,0,self.height/20]
 
                 RobotoLabel:
                     text: "HINTS"
@@ -117,6 +122,7 @@
                 CenteredLabel:
                     id: lives_label_id
                     text: "0"
+                    font_size: points_label_id.font_size
 
 #            DisplayBox:
 #                id:lives_box

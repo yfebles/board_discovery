@@ -46,7 +46,6 @@ class GameApp(App):
 
     def _load_configs_on_play_screen(self, dt):
         try:
-
             self.play_screen.sounds = self.config.getboolean('configs', 'sounds')
             self.play_screen.effects = self.config.getboolean('configs', 'effects')
             self.play_screen.first_run = self.config.getboolean('configs', 'first_run')
@@ -55,7 +54,6 @@ class GameApp(App):
             print("errors changings " + ex.message)
 
     def load_level(self, obj, level):
-        print("asas")
         self.play_screen.pause()
         self.play_screen.load_level(level)
         self.screen_manager.current = 'play'
@@ -86,7 +84,7 @@ class GameApp(App):
         settings.add_json_panel('Settings', self.config, data=jsondata)
 
     def on_config_change(self, config, section, key, value):
-        # value is 0 or 1 for the booleans
+        # value is '0' or '1' for the booleans
         if key == "sounds":
             self.play_screen.sounds = value != '0'
 
