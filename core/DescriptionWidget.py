@@ -3,12 +3,15 @@ import os
 from kivy._event import EventDispatcher
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, ListProperty
 from kivy.uix.floatlayout import FloatLayout
 from kivy.animation import Animation, AnimationTransition
 
 # region Helper Classes
 
+class ShadowLabel(Label):
+    decal = ListProperty([0, 0])
+    tint = ListProperty([1, 1, 1, 1])
 
 class ColoredLabel(Label):
 
@@ -44,6 +47,7 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         super(EventDispatcher, self).__init__(**kwargs)
 
         self.descp = ""
+        self.old_pos = self.pos
 
         self.register_event_type("on_hide")
 
@@ -70,6 +74,10 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         self.show_desp_animation = Animation(size_hint_y=0.95, duration=self.DESCP_SHOW_DELAY_TIME, transition=show_transition)
         self.hide_desp_animation = Animation(size_hint_y=0, duration=self.DESCP_SHOW_DELAY_TIME, transition=hide_transition)
         self.hide_desp_animation.bind(on_complete=self.hide_descp_update)
+
+    def setPos(self, pos):
+        self.pos = pos
+        self.old_pos = pos
 
     def is_descp_visible(self):
         return self.descp_widget in self.children

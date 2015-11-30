@@ -1,8 +1,6 @@
-import os
+from core.screens import *
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
-from core.DescriptionWidget import DescriptionWidget
-from core.screens import *
 
 
 class GameApp(App):
@@ -27,11 +25,13 @@ class GameApp(App):
         self.screen_manager.transition = FadeTransition(duration=0.1)
 
         # set the screens configuration
-        self.menu_screen = MenuScreen(name='menu')
-        self.play_screen = PlayScreen(name='play')
+        self.presentation_screen = PresentationScreen(name='presentation')
         self.author_screen = AuthorScreen(name='author')
         self.levels_screen = LevelsScreen(name='levels')
+        self.menu_screen = MenuScreen(name='menu')
+        self.play_screen = PlayScreen(name='play')
 
+        self.screen_manager.add_widget(self.presentation_screen)
         self.screen_manager.add_widget(self.menu_screen)
         self.screen_manager.add_widget(self.play_screen)
         self.screen_manager.add_widget(self.levels_screen)

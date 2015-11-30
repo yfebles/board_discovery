@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+
+
+<PresentationScreen>:
+    id: presentation_screen
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "intro_back.png")
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: self.height * 0.06
+        size_hint: [0.9, 0.9]
+        pos: presentation_screen.width * 0.05, presentation_screen.height * 0.05
+
+        Widget:
+            size_hint: [1, 0.25]
+
+            canvas.before:
+                Rectangle:
+                    source: os.path.join("assets","images","app_graphics", "game_logo.png")
+                    pos: self.pos
+                    size: self.size
+
+        RoundedButton:
+            size_hint: [0.5, 0.05]
+            pos: presentation_screen.width * 0.25, presentation_screen.height * 0.25
+            text: "[color=#e0ce8e][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Menú[/font][/size][/color]"
+            on_press: app.screen_manager.current = 'menu'
+
+        BoxLayout:
+            size_hint: [0.8, 0.1]
+
+            orientation: 'vertical'
+
+            Label:
+                text: "asas"
+            Label:
+                text: "asas"
+            Label:
+                text: "asas"
+            Label:
+                text: "asas"
+
+
+

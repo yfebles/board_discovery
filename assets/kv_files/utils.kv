@@ -5,18 +5,9 @@
     markup: True
 
     canvas.before:
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", "bttn_menu_border.png")
-            pos: self.pos
-            size: self.size
 
         Rectangle:
             source: os.path.join("assets","images","app_graphics", "bttn_menu_color.png")
-            pos: self.pos
-            size: self.size
-
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", "bttn_menu_int_shadow.png")
             pos: self.pos
             size: self.size
 
@@ -44,25 +35,16 @@
 <DisplayBoxBase@BoxLayout>:
     id: display_box
     back_color_img: "None"
+    shine_shadow_img: "None"
 
     canvas.before:
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", "display_border.png")
-            pos: self.pos
-            size: self.size
-
         Rectangle:
             source: os.path.join("assets","images","app_graphics", display_box.back_color_img)
             pos: self.pos
             size: self.size
 
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", "display_int_shadow.png")
-            pos: self.pos
-            size: self.size
-
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", "display_shine.png")
+            source: os.path.join("assets","images","app_graphics", display_box.shine_shadow_img)
             pos: self.pos
             size: self.size
 
@@ -77,6 +59,9 @@
 
 <FunctionButton@Button+Transparent>:
     font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+    markup: True
+    user_text: ""
+    text: "[color=#96875a]" + self.user_text + "[/color]"
 
     canvas.before:
         Rectangle:
@@ -84,6 +69,24 @@
             pos: self.pos[0] + self.size[0] / 2.0 - min(self.size[0], self.size[1]) / 2.0 , self.pos[1] + self.size[1] / 2.0 - min(self.size[0], self.size[1]) / 2.0
             size: min(self.size[0], self.size[1]), min(self.size[0], self.size[1])
 
+<ShadowLabel>:
+    decal: 2, -2
+    tint: 0, 0, 0, 1
+
+    canvas.before:
+        Color:
+            rgba: root.tint
+
+        Rectangle:
+            pos:
+                int(self.center_x - self.texture_size[0] / 2.) + root.decal[0],\
+                int(self.center_y - self.texture_size[1] / 2.) + root.decal[1]
+
+            size: root.texture_size
+            texture: root.texture
+
+        Color:
+            rgba: 1, 1, 1, 1
 
 <BoardCell@Label+Transparent>:
 
@@ -112,6 +115,46 @@
             source: os.path.join("assets","images","app_graphics", "board_btn_shine.png")
             pos: self.pos
             size: self.size
+
+<LevelBoardCell@BoxLayout>:
+    orientation: 'vertical'
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_border.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_color.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_int_shadow.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_shine.png")
+            pos: self.pos
+            size: self.size
+
+    category_name: "Art"
+    items_count: 0
+
+    CenteredLabel:
+        size_hint: [1, 0.5]
+        markup: True
+        font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+        text: "[color=#96875a]" + root.category_name + "[/color]"
+
+    CenteredLabel:
+        size_hint: [1, 0.5]
+        markup: True
+        font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+        text: "[color=#76643a]" + str(root.items_count) + " levels[/color]"
+
 
 <ColoredLabel@Label>:
     id: colored_label
@@ -180,6 +223,22 @@
             source: self.image
             pos: self.pos
             size: self.size
+
+    Button:
+        size_hint: [0.15, 0.15]
+        background_color: [0] * 4
+        markup: True
+        pos: description_widget.pos[0] + description_widget.width * 0.85, description_widget.pos[1] + description_widget.height * 0.85
+        text: "[color=#ffa200] X [/color]"
+        font_name: os.path.join("assets","fonts","roboto_black.ttf")
+        font_size: self.width * 0.5
+
+        canvas.before:
+            Color:
+                rgba: 0,0,0,1
+            Ellipse:
+                pos:self.center
+                size:self.size
 
     DescriptionName:
         id: item_name

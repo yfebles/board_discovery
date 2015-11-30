@@ -1,11 +1,17 @@
 import os
-from kivy.core.audio import SoundLoader
-from kivy.graphics.vertex_instructions import Rectangle
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.animation import Animation, AnimationTransition
+from kivy.animation import Animation
+from kivy.event import EventDispatcher
+from kivy.graphics.vertex_instructions import Rectangle
 
 
-class BoardCell(Button):
+class LevelBoardCell(BoxLayout):
+    def __init__(self, **kwargs):
+        BoxLayout.__init__(self, **kwargs)
+
+
+class BoardCell(Button, EventDispatcher):
     """
     A board cell
     """
@@ -14,7 +20,6 @@ class BoardCell(Button):
 
     DESCP_SHOW_DELAY_TIME = 0.4
     IMG_PATH = os.path.join('assets', 'images', 'items')
-    FLIP_SOUND = os.path.join('assets', 'sounds', 'flip_sound.wav')
     BORDER_IMAGE = os.path.join("assets", "images", "app_graphics", "board_btn_border.png")
 
     # endregion
@@ -28,6 +33,9 @@ class BoardCell(Button):
         :return:
         """
         Button.__init__(self, **kwargs)
+        super(EventDispatcher, self).__init__(**kwargs)
+
+        self.register_event_type("on_flip")
 
         self.row, self.col = row, col
 
@@ -36,13 +44,17 @@ class BoardCell(Button):
 
         self.flip_animation = None
 
-        sound = SoundLoader.load(self.FLIP_SOUND)
-
-        self.flip_sound = None if not sound else sound
-
         self.level_item = level_item
 
         self.item_image_canvas_instruction = []
+
+    def on_flip(self):
+        """
+        Event fired when the cell has been flipped
+        :return:
+        """
+        pass
+    # region visible, name, image and description properties
 
     @property
     def visible(self):
@@ -54,12 +66,11 @@ class BoardCell(Button):
             return
 
         self._visible = value
-        if self.flip_sound and value:
-            self.flip_sound.play()
+
+        if self.flip_animation:
+            self.flip_animation.cancel(self)
 
         self.flip()
-
-    # region Level Items Properties
 
     @property
     def name(self):
@@ -123,4 +134,6 @@ class BoardCell(Button):
         self.flip_animation.bind(on_complete=self.release_animation)
 
         self.flip_animation.start(self)
+
+        self.dispatch("on_flip")
 

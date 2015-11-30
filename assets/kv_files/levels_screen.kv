@@ -5,28 +5,48 @@
 <LevelsScreen>:
     id: levels_screen
     levels_grid: levels_grid_id
-    spacing: 20
 
     canvas.before:
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
+            source: os.path.join("assets","images","app_graphics", "menu_back.png")
             pos: self.pos
             size: self.size
 
+    # container
     BoxLayout:
-        orientation: "vertical"
-        size_hint: [0.9, 0.9]
-        pos: levels_screen.width * 0.05, levels_screen.height * 0.05
+        orientation: 'vertical'
+        size_hint: [0.95, 0.95]
+        pos: levels_screen.width * 0.025, levels_screen.height * 0.025
 
-        ScrollView:
-            size_hint: [0.9, 1]
-            pos: self.parent.width * 0.05, self.parent.height * 0.05
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: [1, 0.25]
+            id: top_menu
 
-            GridLayout:
-                id: levels_grid_id
-                cols: 3
-                size_hint: [1, None]
+            FunctionButton:
+                id: menu_button
+                size_hint: [0.24, 1]
+                font_size: min(menu_button.width,menu_button.height) * 0.4
+                on_press: app.screen_manager.current = 'menu'
+                user_text: ""
+
+            ShadowLabel:
+                markup:True
+                text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][color=#d0c192]Topics[/color][/size]"
+
+            FunctionButton:
+                id: help_button_id
+                size_hint:[0.25, 1]
+                font_size: min(help_button_id.width,help_button_id.height) * 0.4
+                user_text:  ""
 
 
-        BackToMenuButton:
-            size_hint: [0.1, 1]
+        BoxLayout:
+            orientation: "vertical"
+            size_hint: [1, 0.75]
+
+            ScrollView:
+                GridLayout:
+                    id: levels_grid_id
+                    cols: 3
+                    size_hint: [1, None]

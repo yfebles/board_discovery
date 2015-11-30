@@ -1,33 +1,38 @@
 # -*- coding: utf-8 -*-
 
+import os
 from math import sqrt
+from kivy.uix.modalview import ModalView
 from db.db_orm import DB
-from core.LevelManager import LevelManager
 from kivy.uix.popup import Popup
-from kivy.animation import Animation, AnimationTransition
+from kivy.animation import Animation
 from core.BoardCell import BoardCell
+from kivy.core.audio import SoundLoader
 from kivy.uix.screenmanager import Screen
+from core.LevelManager import LevelManager
 from kivy.properties import ObjectProperty, Clock
 from core.DescriptionWidget import DescriptionWidget
 
-import random
 
-class GameWinPopup(Popup):
+class GameWinView(ModalView):
     continue_playing_bttn = ObjectProperty()
 
 
-class GameLosePopup(Popup):
+class GameLoseView(ModalView):
     repeat_level_bttn = ObjectProperty()
 
 
 class PlayScreen(Screen):
+    """
+    In several methods an argument dt is supplied
+    cause are methods called from a clock timer schedule
+    """
 
     # region WIDGETS
 
     board_widget = ObjectProperty()
     points_lbl = ObjectProperty()
     hints_lbl = ObjectProperty()
-
     help_button = ObjectProperty()
 
     time_lbl = ObjectProperty()
@@ -37,11 +42,15 @@ class PlayScreen(Screen):
 
     # endregion
 
-    # In several methods an argument dt is supplied
-    # cause are methods called from a clock timer schedule
+    # region CONSTANTS
 
-    TIME_FONT_RELATION = 0.8
+    TIME_FONT_RELATION = 0.65
     DESCP_SHOW_DELAY_TIME = 0.45
+    FLIP_SOUND = os.path.join('assets', 'sounds', 'flip_sound.wav')
+    CELLS_PAIRED_OK = os.path.join('assets', 'sounds', 'cell_paired_ok.wav')
+    CELLS_PAIRED_WRONG = os.path.join('assets', 'sounds', 'cell_paired_wrong.wav')
+
+    # endregion
 
     def __init__(self, *args, **kwargs):
         super(PlayScreen, self).__init__(*args, **kwargs)
@@ -49,24 +58,27 @@ class PlayScreen(Screen):
         self.db = DB().get_db_session()
         self.level_manager = LevelManager()
 
-        self.help_widget = DescriptionWidget()
-        self.description_widget = DescriptionWidget()
+        self.help_widget, self.description_widget = [DescriptionWidget()] * 2
 
+        self.description_widget.bind(on_hide=self.hide_descp_widget)
         self.description_widget.size_hint = [0, 0]
+
+        # sounds
+        sound_flip_cell = SoundLoader.load(self.FLIP_SOUND)
+        sound_pair_ok = SoundLoader.load(self.CELLS_PAIRED_OK)
+        sound_pair_wrong = SoundLoader.load(self.CELLS_PAIRED_WRONG)
+
+        self.flip_sound = None if not sound_flip_cell else sound_flip_cell
+        self.cell_paired_ok_sound = None if not sound_pair_ok else sound_pair_ok
+        self.cell_paired_wrong_sound = None if not sound_pair_wrong else sound_pair_wrong
 
         # animations
         self.show_descp_animation = Animation(size_hint_y=1, size_hint_x=1, duration=self.DESCP_SHOW_DELAY_TIME)
         self.hide_descp_animation = Animation(size_hint_y=0, size_hint_x=0, duration=self.DESCP_SHOW_DELAY_TIME)
-
-        self.time_label_colors = [(78, 200, 5, 1),
-                                  (78, 100, 5, 1),
-                                  (78, 0, 5, 1),
-                                  (78, 200, 105, 1)]
-
         self.pause_animation = Animation(opacity=0, duration=0.8) + Animation(opacity=1, duration=0.8)
-        self.pause_animation.repeat = True
 
         self.hide_descp_animation.bind(on_complete=self.remove_descp_widget)
+        self.pause_animation.repeat = True
 
         # Config Vars
         self.sounds, self.effects, self.first_run, self.game_paused = [True] * 4
@@ -76,15 +88,14 @@ class PlayScreen(Screen):
 
         self.pairing_cells_on_going = False
 
-        self.lose_popup = GameLosePopup()
-        self.lose_popup.pos = [self.width * 0.5, self.height * 0.5]
+        # win and lose level animations widgets (Popups by now)
+        self.lose_popup = GameLoseView()
+        self.lose_popup.color = [0] * 4
         self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level))
 
-        self.win_popup = GameWinPopup()
-        self.win_popup.pos = [self.width * 0.75, self.height * 0.75]
+        self.win_popup = GameWinView()
+        self.win_popup.color = [0] * 4
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
-
-        self.description_widget.bind(on_hide=self.hide_descp_widget)
 
         Clock.schedule_interval(self.update_time, timeout=1)
 
@@ -164,7 +175,7 @@ class PlayScreen(Screen):
             raise Exception("The board must have at least 2x2 cells")
 
         self.points = 0
-        self.time_sec = level.time_seg
+        self.time_sec = 47  # level.time_seg
 
         self.board_widget.clear_widgets()
         self.cell_selected, self.second_cell_selected = [None] * 2
@@ -180,6 +191,7 @@ class PlayScreen(Screen):
 
                 self.board_widget.add_widget(board_cell)
                 board_cell.bind(on_press=self.cell_pressed)
+                board_cell.bind(on_flip=self.cell_flipped)
 
         self.update_cells_positions()
         self.hide_descp_widget()
@@ -217,6 +229,14 @@ class PlayScreen(Screen):
 
     # region Game Behavior
 
+    def cell_flipped(self, obj=None):
+        """
+        Callback for when a cell has been flipped
+        :return:
+        """
+        if self.sounds and self.flip_sound:
+            self.flip_sound.play()
+
     def check_game_state(self):
         """
         checks if the game is finished or not.
@@ -236,11 +256,14 @@ class PlayScreen(Screen):
             Clock.schedule_once(self.win_popup.open, timeout=1)
 
     def cell_pressed(self, board_cell):
-        if self.pairing_cells_on_going or self.current_level is None or self.game_paused or self.is_descp_visible():
+        if self.pairing_cells_on_going or self.current_level is None or self.is_descp_visible():
             return
 
         if board_cell.visible:
             self.show_descp_widget(board_cell.center, board_cell)
+            return
+
+        if self.game_paused:
             return
 
         board_cell.visible = True
@@ -252,10 +275,19 @@ class PlayScreen(Screen):
 
         # if the two cells are not related hide them
         if not self.are_connected(self.cell_selected, board_cell):
+
+            # play un-paired sound if must be
+            if self.sounds and self.cell_paired_wrong_sound:
+                self.cell_paired_wrong_sound.play()
+
             self.pairing_cells_on_going = True
             self.second_cell_selected = board_cell
-            Clock.schedule_once(self.pair_cells_failed_restore, timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.2)
+            Clock.schedule_once(self.pair_cells_failed_restore, timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.5)
             return
+
+        # play paired sound if must be
+        if self.sounds and self.cell_paired_ok_sound:
+            self.cell_paired_ok_sound.play()
 
         # if related cells
         self.points += self.current_level.points
@@ -317,10 +349,12 @@ class PlayScreen(Screen):
         self.pause_animation.start(self.time_lbl)
 
     def play(self, dt=None):
-        self.game_paused = False
+        if self.time_sec <= 0:
+            return
 
         self.pause_animation.cancel(self.time_lbl)
         self.time_lbl.opacity = 1
+        self.game_paused = False
 
     def on_leave(self, *args):
         self.pause()
@@ -351,7 +385,7 @@ class PlayScreen(Screen):
         """
         if not self.is_descp_visible():
             self.description_widget.update(board_cell)
-            self.description_widget.pos = pos
+            self.description_widget.setPos(pos)
             self.board_widget.add_widget(self.description_widget)
 
             # stop the game timer when the description is visible
@@ -368,7 +402,8 @@ class PlayScreen(Screen):
             # start the game timer when the description is hide
             Clock.schedule_once(self.play, timeout=self.DESCP_SHOW_DELAY_TIME * 1.1)
 
-            hide_animation = Animation(center=self.board_widget.center, duration=self.DESCP_SHOW_DELAY_TIME)
+            pos = self.description_widget.old_pos
+            hide_animation = Animation(x=pos[0], y=pos[1], duration=self.DESCP_SHOW_DELAY_TIME)
             hide_animation &= self.hide_descp_animation
             hide_animation.start(self.description_widget)
 
