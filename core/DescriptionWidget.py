@@ -36,6 +36,7 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
     # region CONSTANTS
 
     name_widget = ObjectProperty()
+    close_bttn = ObjectProperty()
     descp_widget = ObjectProperty()
 
     DESCP_SHOW_DELAY_TIME = 0.45
@@ -87,6 +88,7 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
             self.show_descp_update()
             self.show_desp_animation.start(self.descp_widget)
             self.name_widget.opacity = 0
+            self.close_bttn.opacity = 0
 
     def hide_descp(self, with_animation=True):
         if not self.is_descp_visible():
@@ -99,10 +101,13 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
             self.hide_descp_update()
             self.name_widget.opacity = 1
 
+        self.close_bttn.opacity = 1
+
     def hide_descp_update(self, obj=None, button=None):
         self.remove_widget(self.descp_widget)
 
         self.name_widget.opacity = 1
+
         self.detail_descp_name.name = ""
         self.detail_descp_label.text = ""
         self.detail_descp_name.button_text = ""
@@ -118,6 +123,11 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         self.descp = board_cell.description
         self.image = board_cell.image
         self.name_widget.name = board_cell.name
+
+    def dispatch_hide(self):
+        self.hide_descp(False)
+
+        self.dispatch("on_hide")
 
     def on_hide(self):
         """

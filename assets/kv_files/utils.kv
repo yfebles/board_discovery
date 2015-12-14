@@ -24,6 +24,7 @@
     valign: 'middle'
     halign: 'center'
 
+
 <BackToMenuButton@RoundedButton>:
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
@@ -91,7 +92,7 @@
 <BoardCell@Label+Transparent>:
 
     font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-    font_size: min(self.width, self.height) * 0.65
+    font_size: min(self.width, self.height) * 0.5
     background_color:[0] * 4
     text: ""
 
@@ -177,7 +178,6 @@
     button_callback: None
     transparency: 0.0
 
-
     canvas.before:
         Color:
             rgba: [0,0,0, descp_name.transparency]
@@ -193,7 +193,6 @@
         text: descp_name.name
         font_size: min(self.height * 0.8 ,self.width * 0.08)
 
-
     Button:
         id: open_descp_bttn
         size_hint: [0.2, 1]
@@ -208,9 +207,10 @@
 
 <DescriptionWidget@FloatLayout>:
 
+
     id:description_widget
     image:  os.path.join("assets", "images", "items", "android.jpg")
-
+    close_bttn: bttn_close
     name_widget: item_name
 
     canvas.before:
@@ -225,20 +225,25 @@
             size: self.size
 
     Button:
+        id: bttn_close
         size_hint: [0.15, 0.15]
         background_color: [0] * 4
         markup: True
         pos: description_widget.pos[0] + description_widget.width * 0.85, description_widget.pos[1] + description_widget.height * 0.85
-        text: "[color=#ffa200] X [/color]"
-        font_name: os.path.join("assets","fonts","roboto_black.ttf")
-        font_size: self.width * 0.5
+        text: "[color=#000000]  [/color]"
+        font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+        font_size: min(self.width, self.height) * 0.7
 
         canvas.before:
             Color:
-                rgba: 0,0,0,1
+                rgba: 1, 162 / 255.0, 0, 1
+
             Ellipse:
-                pos:self.center
-                size:self.size
+                pos: self.pos[0] + self.width / 2  - min(self.width, self.height) * 0.25, self.pos[1] + self.height / 2 - min(self.width, self.height) * 0.25
+                size: min(self.width, self.height) * 0.5, min(self.width, self.height) * 0.5
+
+        on_press: root.dispatch_hide()
+
 
     DescriptionName:
         id: item_name
@@ -248,3 +253,8 @@
         name: "Android System"
         button_text: ""
         button_callback: description_widget.show_descp
+
+<PresentationLabel@CenteredLabel+ShadowLabel>:
+    markup: True
+    font_size: min(self.width / 10, 20)
+

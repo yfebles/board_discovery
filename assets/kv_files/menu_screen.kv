@@ -21,7 +21,7 @@
         pos: menu_screen.width * 0.15, menu_screen.height * 0.15
 
         RoundedButton:
-            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Play[/font][/size]"
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Play[/font][/size]"
             on_press: app.screen_manager.current = 'play'
 
         RoundedButton:
@@ -29,13 +29,13 @@
             on_press: app.open_settings()
 
         RoundedButton:
-            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 7.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font]  [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Levels[/font][/size]"
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font]  [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Levels[/font][/size]"
             on_press: app.screen_manager.current = 'levels'
 
         RoundedButton:
-            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 7.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Author[/font][/size]"
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Author[/font][/size]"
             on_press: app.screen_manager.current = 'author'
 
         RoundedButton:
-            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 7.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Exit[/font][/size]"
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Exit[/font][/size]"
             on_press: app.close()

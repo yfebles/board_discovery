@@ -1,5 +1,8 @@
-from core.screens import *
+import webbrowser
 from kivy.app import App
+from core.screens import *
+from kivy.utils import platform
+from kivy.core.window import Window, android
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 
 
@@ -7,13 +10,15 @@ class GameApp(App):
 
     # region CONSTANTS
 
+    use_kivy_settings = False
+    ESCAPE_BUTTON_CODE = 27
+    ANDROID_MENU_BUTTON_CODE = 1001
+    ANDROID_BACK_BUTTON_CODE = 1000
+
     KV_FILE_PATH = os.path.join("assets", "kv_files", "menu_screen.kv")
+    GIFTY_GAME_WEB_SITE = "http://play.google.com/giftygames"
 
     # endregion
-
-    use_kivy_settings = False
-
-    # region Initialize
 
     def __init__(self, *args, **kwargs):
         super(GameApp, self).__init__(*args, **kwargs)
@@ -41,22 +46,26 @@ class GameApp(App):
 
         Clock.schedule_once(self._load_configs_on_play_screen, timeout=1)
 
+        self.bind(on_start=self.post_build_init)
+
         # dict for i18n
         self.translate_dict = {}
 
-    def _load_configs_on_play_screen(self, dt):
+    # region Build & Configs
+
+    def build(self):
+        return self.screen_manager
+
+    def close(self):
         try:
-            self.play_screen.sounds = self.config.getboolean('configs', 'sounds')
-            self.play_screen.effects = self.config.getboolean('configs', 'effects')
-            self.play_screen.first_run = self.config.getboolean('configs', 'first_run')
+
+            self.config.set('configs', 'first_run', 0)
+            self.config.write()
 
         except Exception as ex:
             print("errors changings " + ex.message)
 
-    def load_level(self, obj, level):
-        self.play_screen.pause()
-        self.play_screen.load_level(level)
-        self.screen_manager.current = 'play'
+        self.stop()
 
     def build_config(self, config):
         config.add_section('configs')
@@ -83,6 +92,15 @@ class GameApp(App):
 
         settings.add_json_panel('Settings', self.config, data=jsondata)
 
+    def _load_configs_on_play_screen(self, dt):
+        try:
+            self.play_screen.sounds = self.config.getboolean('configs', 'sounds')
+            self.play_screen.effects = self.config.getboolean('configs', 'effects')
+            self.play_screen.first_run = self.config.getboolean('configs', 'first_run')
+
+        except Exception as ex:
+            print("errors changings " + ex.message)
+
     def on_config_change(self, config, section, key, value):
         # value is '0' or '1' for the booleans
         if key == "sounds":
@@ -94,24 +112,41 @@ class GameApp(App):
         if key == "first_run":
             self.play_screen.first_run = value != '0'
 
+
+    # endregion
+
+    # region Handle back button on Android
+
+    def post_build_init(self, *args):
+        if platform() == 'android':
+            android.map_key(android.KEYCODE_BACK, self.ANDROID_BACK_BUTTON_CODE)
+
+        win = Window
+        win.bind(on_keyboard=self.key_handler)
+
+    def key_handler(self, window, keycode1, keycode2, text, modifiers):
+        if keycode1 in [self.ESCAPE_BUTTON_CODE, self.ANDROID_BACK_BUTTON_CODE, self.ANDROID_MENU_BUTTON_CODE]:
+            if self.screen_manager.current in ['menu', 'presentation']:
+                self.close()
+
+            self.screen_manager.current = 'menu'
+            return True
+
+        return False
+
     # endregion
 
     def translate(self, text):
         pass
 
-    def build(self):
-        return self.screen_manager
+    def load_level(self, obj, level):
+        self.play_screen.pause()
+        self.play_screen.load_level(level)
+        self.screen_manager.current = 'play'
 
-    def close(self):
-        try:
+    def visit_gifty_games(self, obj=None):
+        webbrowser.open(self.GIFTY_GAME_WEB_SITE)
 
-            self.config.set('configs', 'first_run', 0)
-            self.config.write()
-
-        except Exception as ex:
-            print("errors changings " + ex.message)
-
-        self.stop()
 
 if __name__ == '__main__':
     app = GameApp()

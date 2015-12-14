@@ -47,7 +47,7 @@
 
             # time box
             BoxLayout:
-                padding: [0, (self.height - min(menu_button.size[0], menu_button.size[1])) / 2.25 ]
+
 
                 DisplayBoxHorizontal:
                     id: time_box
@@ -61,7 +61,7 @@
                         paused: play_screen.game_paused
                         size_hint:[0.25, 1]
                         font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-                        font_size: min(time_box.width, time_box.height) * (0.7 if self.paused else 0.9)
+                        font_size: min(time_box.width, time_box.height) * (0.5 if self.paused else 0.7)
                         text: "" if self.paused else ""
 
                         # invisible background
@@ -75,7 +75,7 @@
                         text: "00:00"
                         font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
                         background_color: [1] * 4
-                        font_size: min(time_box.width, time_box.height) * play_screen.TIME_FONT_RELATION
+                        font_size: min(time_box.width / 4, time_box.height) * play_screen.TIME_FONT_RELATION
 
 
             # display help
