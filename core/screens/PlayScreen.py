@@ -3,7 +3,7 @@
 import os
 from math import sqrt
 from kivy.uix.modalview import ModalView
-from db.db_orm import DB
+from core.db_orm import DB
 from kivy.uix.popup import Popup
 from kivy.animation import Animation
 from core.BoardCell import BoardCell
