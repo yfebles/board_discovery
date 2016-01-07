@@ -54,6 +54,7 @@ class BoardCell(Button, EventDispatcher):
         :return:
         """
         pass
+
     # region visible, name, image and description properties
 
     @property
@@ -124,7 +125,6 @@ class BoardCell(Button, EventDispatcher):
 
         self.item_image_canvas_instruction = []
         self.item_image_canvas_instruction.append(Rectangle(source=self.image, pos=self.pos, size=self.size))
-        self.item_image_canvas_instruction.append(Rectangle(source=self.BORDER_IMAGE, pos=self.pos, size=self.size))
 
         self.flip_animation = Animation(size_hint_x=0, x=old_x + self.width / 2, duration=self.DESCP_SHOW_DELAY_TIME / 2)
 

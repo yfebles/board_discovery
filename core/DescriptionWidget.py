@@ -76,6 +76,17 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         self.hide_desp_animation = Animation(size_hint_y=0, duration=self.DESCP_SHOW_DELAY_TIME, transition=hide_transition)
         self.hide_desp_animation.bind(on_complete=self.hide_descp_update)
 
+    # region visual effects
+
+    def _font_color_change(self, touch_down):
+        """
+        change of the font color on touch
+        :return:
+        """
+        pass
+
+    # endregion
+
     def setPos(self, pos):
         self.pos = pos
         self.old_pos = pos
@@ -136,3 +147,4 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         :return:
         """
         pass
+

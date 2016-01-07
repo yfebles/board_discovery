@@ -23,3 +23,6 @@ screens/PlayScreen.pyc
 utils.pyc
 *.pyc
 *.pyc
+assets/images/items/iceberg.jpg
+*.png
+*.jpg

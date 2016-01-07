@@ -1,3 +1,4 @@
 title= BoardDiscovery
 author= GiftyGames
 orientation=portrait
+icon=ico.png

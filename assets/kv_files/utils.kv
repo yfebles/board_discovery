@@ -207,18 +207,12 @@
 
 <DescriptionWidget@FloatLayout>:
 
-
     id:description_widget
     image:  os.path.join("assets", "images", "items", "android.jpg")
     close_bttn: bttn_close
     name_widget: item_name
 
     canvas.before:
-        Rectangle:
-            source: os.path.join("assets", "images", "app_graphics", "back_item_cell.png")
-            pos: self.pos
-            size: self.size
-
         Rectangle:
             source: self.image
             pos: self.pos
@@ -229,8 +223,9 @@
         size_hint: [0.15, 0.15]
         background_color: [0] * 4
         markup: True
+        text_color: "#000000"
         pos: description_widget.pos[0] + description_widget.width * 0.85, description_widget.pos[1] + description_widget.height * 0.85
-        text: "[color=#000000]  [/color]"
+        text: "[color=" + self.text_color + "]  [/color]"
         font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
         font_size: min(self.width, self.height) * 0.7
 
@@ -244,13 +239,15 @@
 
         on_press: root.dispatch_hide()
 
+        on_touch_down: self.text_color = "#AAAAAA"
+        on_touch_up: self.text_color = "#000000"
 
     DescriptionName:
         id: item_name
         size_hint: [0.95, 0.15]
-        transparency: 0.5
+        transparency: 0.7
         pos: description_widget.pos[0] + description_widget.width * 0.025, description_widget.pos[1] + description_widget.height * 0.025
-        name: "Android System"
+        name: " "
         button_text: ""
         button_callback: description_widget.show_descp
 
