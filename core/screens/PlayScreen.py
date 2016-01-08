@@ -2,12 +2,12 @@
 
 import os
 from math import sqrt
+from kivy.app import App
 from kivy.uix.modalview import ModalView
+from core.Sounds import Sounds
 from core.db_orm import DB
-from kivy.uix.popup import Popup
 from kivy.animation import Animation
 from core.BoardCell import BoardCell
-from kivy.core.audio import SoundLoader
 from kivy.uix.screenmanager import Screen
 from core.LevelManager import LevelManager
 from kivy.properties import ObjectProperty, Clock
@@ -47,10 +47,6 @@ class PlayScreen(Screen):
     TIME_FONT_RELATION = 0.7
     DESCP_SHOW_DELAY_TIME = 0.45
 
-    CLOCK_SOUND = os.path.join('assets', 'sounds', 'clock.wav')
-    FLIP_SOUND = os.path.join('assets', 'sounds', 'flip_sound.wav')
-    CELLS_PAIRED_OK = os.path.join('assets', 'sounds', 'cell_paired_ok.wav')
-    CELLS_PAIRED_WRONG = os.path.join('assets', 'sounds', 'cell_paired_wrong.wav')
 
     # endregion
 
@@ -65,10 +61,6 @@ class PlayScreen(Screen):
         self.description_widget.bind(on_hide=self.hide_descp_widget)
         self.description_widget.size_hint = [0, 0]
 
-        # sounds
-        self.flip_sound, self.cell_paired_ok_sound, self.cell_paired_wrong_sound, self.clock_sound = [None] * 4
-        self.load_sounds()
-
         # animations
         self.show_descp_animation = Animation(size_hint_y=1, size_hint_x=1, duration=self.DESCP_SHOW_DELAY_TIME)
         self.hide_descp_animation = Animation(size_hint_y=0, size_hint_x=0, duration=self.DESCP_SHOW_DELAY_TIME)
@@ -78,7 +70,7 @@ class PlayScreen(Screen):
         self.pause_animation.repeat = True
 
         # Config Vars
-        self.sounds, self.effects, self.first_run, self.game_paused = [True] * 4
+        self.effects, self.first_run, self.game_paused = [True] * 3
 
         self.board = []
         self.cell_selected, self.second_cell_selected, self.current_level = [None] * 3
@@ -95,26 +87,6 @@ class PlayScreen(Screen):
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
         Clock.schedule_interval(self.update_time, timeout=1)
-
-    def load_sounds(self):
-        sounds = [SoundLoader.load(s) for s in [self.FLIP_SOUND, self.CLOCK_SOUND, self.CELLS_PAIRED_OK, self.CELLS_PAIRED_WRONG]]
-        sound_flip_cell, sound_clock, sound_pair_ok , sound_pair_wrong = sounds
-
-        self.flip_sound = None if not sound_flip_cell else sound_flip_cell
-        self.cell_paired_ok_sound = None if not sound_pair_ok else sound_pair_ok
-        self.cell_paired_wrong_sound = None if not sound_pair_wrong else sound_pair_wrong
-
-        if sound_clock:
-            self.clock_sound = sound_clock
-            self.clock_sound.repeat = True
-
-    def play_sound(self, sound):
-        if self.sounds and sound:
-            sound.play()
-
-    def stop_sound(self, sound):
-        if self.sounds and sound:
-            sound.stop()
 
     # region Properties
 
@@ -149,8 +121,8 @@ class PlayScreen(Screen):
 
     @time_sec.setter
     def time_sec(self, time_sec_count):
-        if time_sec_count < 10 and self.clock_sound.state is not 'play':
-            self.play_sound(self.clock_sound)
+        if time_sec_count < 10:
+            Sounds().play_clock_sound()
 
         # time label in format "00:00" min:sec
         minutes = time_sec_count / 60
@@ -254,7 +226,7 @@ class PlayScreen(Screen):
         Callback for when a cell has been flipped
         :return:
         """
-        self.play_sound(self.flip_sound)
+        Sounds().play_cell_flip_sound()
 
     def check_game_state(self):
         """
@@ -296,8 +268,7 @@ class PlayScreen(Screen):
         if not self.are_connected(self.cell_selected, board_cell):
 
             # play un-paired sound if must be
-            if self.sounds and self.cell_paired_wrong_sound:
-                self.cell_paired_wrong_sound.play()
+            Sounds().play_cell_paired_wrong_sound()
 
             self.pairing_cells_on_going = True
             self.second_cell_selected = board_cell
@@ -305,8 +276,7 @@ class PlayScreen(Screen):
             return
 
         # play paired sound if must be
-        if self.sounds and self.cell_paired_ok_sound:
-            self.cell_paired_ok_sound.play()
+        Sounds().play_cell_paired_ok_sound()
 
         # if related cells
         self.points += self.current_level.points
@@ -367,7 +337,7 @@ class PlayScreen(Screen):
         self.game_paused = True
         self.pause_animation.start(self.time_lbl)
 
-        self.stop_sound(self.clock_sound)
+        Sounds().stop_clock_sound()
 
     def play(self, dt=None):
         if self.time_sec <= 0:
@@ -452,3 +422,12 @@ class PlayScreen(Screen):
 
         # always return true to keep alive the timer
         return True
+
+    def display_settings(self):
+        """
+        Method that display settings on the screen
+        :return:
+        """
+        self.pause()
+
+        App.get_running_app().open_settings()

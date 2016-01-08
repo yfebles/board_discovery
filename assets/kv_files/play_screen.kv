@@ -42,7 +42,7 @@
                 id: menu_button
                 size_hint:[0.24, 1]
                 font_size: min(menu_button.width,menu_button.height) * 0.4
-                on_press: app.screen_manager.current = 'menu'
+                on_press: app.screen_manager.current = 'presentation' # lite version do not have menu so is only presentation and play
                 user_text: ""
 
             # time box
@@ -78,13 +78,13 @@
                         font_size: min(time_box.width / 4, time_box.height) * play_screen.TIME_FONT_RELATION
 
 
-            # display help
+            # display settings
             FunctionButton:
                 id: help_button_id
                 size_hint:[0.24, 1]
                 font_size: min(help_button_id.width,help_button_id.height) * 0.4
-                user_text: ""
-                on_press: root.help_button_pressed()
+                user_text: ""
+                on_press: root.display_settings()
 
         # game board
         FloatLayout:

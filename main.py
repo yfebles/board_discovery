@@ -1,5 +1,6 @@
 import webbrowser
 from kivy.app import App
+from core.Configs import Configs
 from core.screens import *
 from kivy.utils import platform
 from kivy.core.window import Window, android
@@ -31,18 +32,22 @@ class GameApp(App):
 
         # set the screens configuration
         self.presentation_screen = PresentationScreen(name='presentation')
-        self.author_screen = AuthorScreen(name='author')
-        self.levels_screen = LevelsScreen(name='levels')
-        self.menu_screen = MenuScreen(name='menu')
+
+        # no author, level or menu screen on lite version
+        # self.author_screen = AuthorScreen(name='author')
+        # self.levels_screen = LevelsScreen(name='levels')
+        # self.menu_screen = MenuScreen(name='menu')
+
         self.play_screen = PlayScreen(name='play')
 
         self.screen_manager.add_widget(self.presentation_screen)
-        self.screen_manager.add_widget(self.menu_screen)
         self.screen_manager.add_widget(self.play_screen)
-        self.screen_manager.add_widget(self.levels_screen)
-        self.screen_manager.add_widget(self.author_screen)
 
-        self.levels_screen.bind(on_open_level=self.load_level)
+        # self.screen_manager.add_widget(self.menu_screen)
+        # self.screen_manager.add_widget(self.levels_screen)
+        # self.screen_manager.add_widget(self.author_screen)
+
+        # self.levels_screen.bind(on_open_level=self.load_level)
 
         Clock.schedule_once(self._load_configs_on_play_screen, timeout=1)
 
@@ -103,15 +108,18 @@ class GameApp(App):
 
     def on_config_change(self, config, section, key, value):
         # value is '0' or '1' for the booleans
+
         if key == "sounds":
-            self.play_screen.sounds = value != '0'
+            Configs().sounds = value != '0'
 
         if key == "effects":
-            self.play_screen.effects = value != '0'
+            Configs().effects = value != '0'
 
         if key == "first_run":
-            self.play_screen.first_run = value != '0'
+            Configs().first_run = value != '0'
 
+        if key == "hints":
+            Configs().hints = value != '0'
 
     # endregion
 
@@ -126,10 +134,10 @@ class GameApp(App):
 
     def key_handler(self, window, keycode1, keycode2, text, modifiers):
         if keycode1 in [self.ESCAPE_BUTTON_CODE, self.ANDROID_BACK_BUTTON_CODE, self.ANDROID_MENU_BUTTON_CODE]:
-            if self.screen_manager.current in ['menu', 'presentation']:
-                self.close()
+            # if self.screen_manager.current in ['menu', 'presentation']:
+            #     self.close()
 
-            self.screen_manager.current = 'menu'
+            # self.screen_manager.current = 'menu'
             return True
 
         return False

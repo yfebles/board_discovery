@@ -38,8 +38,8 @@
 
                 RoundedButton:
                     size_hint: [1, 0.2]
-                    text: "[color=#e0ce8e][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Menú[/font][/size][/color]"
-                    on_press: app.screen_manager.current = 'menu'
+                    text: "[color=#e0ce8e][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Jugar [/font][/size][/color]"
+                    on_press: app.screen_manager.current = 'play'  # the lite version go straight to play no to menu
 
                 Widget:
                     size_hint: [1, 0.3]
