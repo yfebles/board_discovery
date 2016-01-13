@@ -8,13 +8,14 @@ from sqlalchemy.orm import relationship, mapper, relation
 
 Base = declarative_base()
 
+# path for tests
 # db_path = ""
 
-db_path = os.path.join(os.getcwd(), "core")
+# production path
+db_path = os.path.join(os.getcwd(), "core", "db")
 
 
 class ItemTags(Base):
-
     __tablename__ = 'item_tags'
     item_id = Column(Integer, ForeignKey('Item.item_id', ondelete='cascade'), primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey('Tags.tag_id', ondelete='cascade'), primary_key=True, nullable=False)
@@ -24,7 +25,6 @@ class ItemTags(Base):
 
 
 class Tag(Base):
-
     __tablename__ = 'Tags'
     tag_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(Unicode(50), nullable=False, unique=True)
@@ -33,7 +33,7 @@ class Tag(Base):
 
     # parent tag
     parent_id = Column(Integer, ForeignKey('Tags.tag_id', ondelete='cascade'), nullable=True)
-    children = relation('Tag',  backref=orm.backref("parent", remote_side='Tag.tag_id'))
+    children = relation('Tag', backref=orm.backref("parent", remote_side='Tag.tag_id'))
 
     def get_distance(self, item):
         """
@@ -75,7 +75,7 @@ class Item(Base):
     """
 
     __tablename__ = 'Item'
-    item_id = Column(Integer,  primary_key=True, nullable=False, autoincrement=True)
+    item_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(Unicode(50), nullable=False, unique=True)
     description = Column(Unicode(300))
     image = Column(Unicode(250))
@@ -157,8 +157,13 @@ class ItemLevel(Base):
     The item-level belonging relationship
     """
     __tablename__ = 'item_level'
-    item_id = Column(Integer, ForeignKey('Item.item_id', ondelete='cascade'), primary_key=True, nullable=False)
+    item_id = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
+    item_id2 = Column(Integer, ForeignKey('Item.item_id'), primary_key=True, nullable=False)
     level_id = Column(Integer, ForeignKey('Level.level_id', ondelete='cascade'), primary_key=True, nullable=False)
+
+    item1 = orm.relation(Item, primaryjoin=(Item.item_id == item_id))
+    item2 = orm.relation(Item, primaryjoin=(Item.item_id == item_id2))
+    level = orm.relation('Level')
 
 
 class Statistics(Base):
@@ -194,14 +199,27 @@ class Level(Base):
     # the max distance of the relationships allowed ( if greater is more complex )
     difficulty = Column(Integer, nullable=False, default=0)
 
-    items = orm.relation(Item, secondary='item_level',  backref='levels')
+    _items_related = orm.relation(ItemLevel, backref='levels')
     statistic = orm.relation(Statistics, backref='levels')
 
     relations = None
 
-    def are_connected(self, item1, item2):
-        if self.relations is None:
+    @property
+    def items(self):
+        # there is 2 items on each relation on the level
+        return [i.item1 for i in self._items_related] + [i.item2 for i in self._items_related]
 
+    def are_connected(self, item1, item2):
+        # could be done by any() but this seems to be more readable
+
+        for x in self._items_related:
+            if (x.item1 == item1 and x.item2 == item2) or (x.item2 == item1 and x.item1 == item2):
+                return True
+
+        return False
+
+    def _are_connected(self, item1, item2):
+        if self.relations is None:
             self.relations = dict([(i, i.all_related_items(self.difficulty)) for i in self.items])
 
         if isinstance(item1, int) and isinstance(item2, int):
@@ -245,7 +263,6 @@ class DB:
 
 
 def update_distances():
-
     a = DB().get_db_session()
 
     for item in a.query(Item).all():
@@ -261,4 +278,4 @@ def update_distances():
 
                     if t.distance != d:
                         t.distance = d
-                        print(u"Tag: {0}, Item: {1}, Distance: {2}".format(item.name, tag.name,d))
+                        print(u"Tag: {0}, Item: {1}, Distance: {2}".format(item.name, tag.name, d))

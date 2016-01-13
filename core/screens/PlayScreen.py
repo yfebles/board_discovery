@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import os
+import random
 from math import sqrt
 from kivy.app import App
 from kivy.uix.modalview import ModalView
-from core.Sounds import Sounds
-from core.db_orm import DB
 from kivy.animation import Animation
-from core.BoardCell import BoardCell
 from kivy.uix.screenmanager import Screen
-from core.LevelManager import LevelManager
 from kivy.properties import ObjectProperty, Clock
+
+from core.Sounds import Sounds
+from core.db.db_orm import DB
+from core.BoardCell import BoardCell
+from core.LevelManager import LevelManager
 from core.DescriptionWidget import DescriptionWidget
 
 
@@ -167,7 +168,7 @@ class PlayScreen(Screen):
             raise Exception("The board must have at least 2x2 cells")
 
         self.points = 0
-        self.time_sec = 15  # level.time_seg
+        self.time_sec = level.time_seg
 
         self.board_widget.clear_widgets()
         self.cell_selected, self.second_cell_selected = [None] * 2
@@ -184,6 +185,15 @@ class PlayScreen(Screen):
                 self.board_widget.add_widget(board_cell)
                 board_cell.bind(on_press=self.cell_pressed)
                 board_cell.bind(on_flip=self.cell_flipped)
+
+        # randomize the level with cols^2 changes
+        for _ in xrange(cols * cols):
+            row, column = random.randint(0, cols - 1), random.randint(0, cols - 1)
+            row1, column1 = random.randint(0, cols - 1), random.randint(0, cols - 1)
+
+            temp = self.board[row][column]
+            self.board[row][column] = self.board[row1][column1]
+            self.board[row1][column1] = temp
 
         self.update_cells_positions()
         self.hide_descp_widget()
@@ -265,7 +275,7 @@ class PlayScreen(Screen):
             return
 
         # if the two cells are not related hide them
-        if not self.are_connected(self.cell_selected, board_cell):
+        if not self.current_level.are_connected(self.cell_selected.level_item, board_cell.level_item):
 
             # play un-paired sound if must be
             Sounds().play_cell_paired_wrong_sound()
@@ -285,20 +295,6 @@ class PlayScreen(Screen):
 
         # check if the game has been wined
         self.check_game_state()
-
-    def are_connected(self, cell1, cell2):
-        """
-        Method that checks the connection between the two supplied cells
-        on the current level
-        :param cell1: The first Board Cell to check
-        :param cell2: The second Board Cell to check
-        :return: True if connected on the level False otherwise
-        """
-        # the indexed in the  level items list
-        cell_1_index = cell1.row * self.columns + cell1.col
-        cell_2_index = cell2.row * self.columns + cell2.col
-
-        return self.current_level.are_connected(cell_1_index, cell_2_index)
 
     def pair_cells_failed_restore(self, obj=None):
 

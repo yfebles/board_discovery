@@ -1,4 +1,3 @@
-from kivy.config import Config
 import os
 from kivy.core.audio import SoundLoader
 from core.Configs import Configs
@@ -14,106 +13,57 @@ class Sounds:
         # region SOUNDS PATHS
 
         CLOCK_SOUND = os.path.join('assets', 'sounds', 'clock.wav')
+        CLICK_SOUND = os.path.join('assets', 'sounds', 'click.wav')
         FLIP_SOUND = os.path.join('assets', 'sounds', 'flip_sound.wav')
         CELLS_PAIRED_OK = os.path.join('assets', 'sounds', 'cell_paired_ok.wav')
         CELLS_PAIRED_WRONG = os.path.join('assets', 'sounds', 'cell_paired_wrong.wav')
+
 
         # endregion
 
         def __init__(self, **kwargs):
 
-            self.flip_sound, self.cell_paired_ok_sound, self.cell_paired_wrong_sound, self.clock_sound = [None] * 4
+            self.flip_sound, self.cell_paired_ok_sound, self.cell_paired_wrong_sound = [None] * 3
+            self.click_sound = None
 
             self._load_sounds()
 
-        # region Play Methods
+            self.play_clock_sound = lambda: self.try_play(self.clock_sound) \
+                if self.clock_sound and self.clock_sound.state is not 'play' else None
+
+            self.play_click_sound = lambda: self.try_play(self.click_sound)
+            self.play_cell_flip_sound = lambda: self.try_play(self.flip_sound)
+            self.play_cell_paired_ok_sound = lambda: self.try_play(self.cell_paired_ok_sound)
+            self.play_cell_paired_wrong_sound = lambda: self.try_play(self.cell_paired_wrong_sound)
+
+            self.stop_clock_sound = lambda: self.try_stop(self.flip_sound)
+            self.stop_click_sound = lambda: self.try_stop(self.click_sound)
+            self.stop_cell_flip_sound = lambda: self.try_stop(self.clock_sound)
+            self.stop_cell_paired_ok_sound = lambda: self.try_stop(self.cell_paired_ok_sound)
+            self.stop_cell_paired_wrong_sound = lambda: self.try_stop(self.cell_paired_wrong_sound)
 
         def try_play(self, sound):
             if Configs().sounds and sound:
                 sound.play()
 
-        def play_cell_flip_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-            self.try_play(self.flip_sound)
-
-        def play_cell_paired_ok_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-            self.try_play(self.cell_paired_ok_sound)
-
-        def play_cell_paired_wrong_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-
-            self.try_play(self.cell_paired_wrong_sound)
-
-        def play_clock_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-            if self.clock_sound and self.clock_sound.state is not 'play':
-                self.try_play(self.clock_sound)
-
-        # endregion
-
-        # region Stop Methods
-
         def try_stop(self, sound):
             if Configs().sounds and sound:
                 sound.stop()
 
-        def stop_cell_flip_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-            self.try_stop(self.flip_sound)
-
-        def stop_cell_paired_ok_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-            self.try_stop(self.cell_paired_ok_sound)
-
-        def stop_cell_paired_wrong_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-
-            self.try_stop(self.cell_paired_wrong_sound)
-
-        def stop_clock_sound(self):
-            """
-            Plays the button click sound
-            :return:
-            """
-
-            self.try_stop(self.clock_sound)
-        # endregion
-
         def _load_sounds(self):
             sounds = [SoundLoader.load(s) for s in [self.FLIP_SOUND, self.CLOCK_SOUND, self.CELLS_PAIRED_OK,
-                                                    self.CELLS_PAIRED_WRONG]]
+                                                    self.CELLS_PAIRED_WRONG, self.CLICK_SOUND]]
 
-            sound_flip_cell, sound_clock, sound_pair_ok , sound_pair_wrong = sounds
+            sound_flip_cell_ok, sound_clock_ok, sound_pair_ok, sound_pair_wrong, sound_click_ok = sounds
 
-            self.flip_sound = None if not sound_flip_cell else sound_flip_cell
+            self.click_sound = None if not sound_click_ok else sound_click_ok
+            self.flip_sound = None if not sound_flip_cell_ok else sound_flip_cell_ok
             self.cell_paired_ok_sound = None if not sound_pair_ok else sound_pair_ok
             self.cell_paired_wrong_sound = None if not sound_pair_wrong else sound_pair_wrong
 
             # the clock tick tack effect
-            if sound_clock:
-                self.clock_sound = sound_clock
+            if sound_clock_ok:
+                self.clock_sound = sound_clock_ok
                 self.clock_sound.repeat = True
 
     # storage for the instance reference

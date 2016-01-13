@@ -16,6 +16,8 @@
             pos: self.pos
             size: self.size
 
+    on_touch_down: app.sounds.play_click_sound()
+
 
 <RobotoLabel@Label>:
     font_name: os.path.join("assets","fonts","roboto_ligth.ttf")
@@ -69,6 +71,8 @@
             source: os.path.join("assets","images","app_graphics", "function_btn_border.png")
             pos: self.pos[0] + self.size[0] / 2.0 - min(self.size[0], self.size[1]) / 2.0 , self.pos[1] + self.size[1] / 2.0 - min(self.size[0], self.size[1]) / 2.0
             size: min(self.size[0], self.size[1]), min(self.size[0], self.size[1])
+
+    on_touch_down: app.sounds.play_click_sound(), app.open_settings()
 
 <ShadowLabel>:
     decal: 2, -2
@@ -254,4 +258,6 @@
 <PresentationLabel@CenteredLabel+ShadowLabel>:
     markup: True
     font_size: min(self.width / 10, 20)
+
+
 

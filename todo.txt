@@ -1,7 +1,0 @@
-* create levels
-* compile into apk
-* design ui implementation
-* ui effects and game modes
-
-
-

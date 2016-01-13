@@ -1,7 +1,9 @@
+import os
 import webbrowser
 from kivy.app import App
-from core.Configs import Configs
 from core.screens import *
+from core.Sounds import Sounds
+from core.Configs import Configs
 from kivy.utils import platform
 from kivy.core.window import Window, android
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
@@ -26,6 +28,8 @@ class GameApp(App):
 
         self.load_kv(self.KV_FILE_PATH)
 
+        self.sounds = Sounds()
+
         # set the transition manager between screens
         self.screen_manager = ScreenManager()
         self.screen_manager.transition = FadeTransition(duration=0.1)
@@ -49,7 +53,7 @@ class GameApp(App):
 
         # self.levels_screen.bind(on_open_level=self.load_level)
 
-        Clock.schedule_once(self._load_configs_on_play_screen, timeout=1)
+        Clock.schedule_once(self._load_configs, timeout=1)
 
         self.bind(on_start=self.post_build_init)
 
@@ -97,14 +101,14 @@ class GameApp(App):
 
         settings.add_json_panel('Settings', self.config, data=jsondata)
 
-    def _load_configs_on_play_screen(self, dt):
+    def _load_configs(self, dt):
         try:
-            self.play_screen.sounds = self.config.getboolean('configs', 'sounds')
-            self.play_screen.effects = self.config.getboolean('configs', 'effects')
-            self.play_screen.first_run = self.config.getboolean('configs', 'first_run')
+            Configs().sounds = self.config.getboolean('configs', 'sounds')
+            Configs().effects = self.config.getboolean('configs', 'effects')
+            Configs().first_run = self.config.getboolean('configs', 'first_run')
 
         except Exception as ex:
-            print("errors changings " + ex.message)
+            print("errors changing " + ex.message)
 
     def on_config_change(self, config, section, key, value):
         # value is '0' or '1' for the booleans
