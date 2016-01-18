@@ -4,9 +4,10 @@
 <PresentationScreen>:
     id: presentation_screen
 
+    back_image: "intro_back.jpg"
     canvas.before:
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", "intro_back.png")
+            source: os.path.join("assets","images","app_graphics", self.back_image)
             pos: self.pos
             size: self.size
 
@@ -38,7 +39,7 @@
 
                 RoundedButton:
                     size_hint: [1, 0.2]
-                    text: "[color=#e0ce8e][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Jugar [/font][/size][/color]"
+                    text: "[color=#94875a][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "]  [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "]Jugar[/font][/size][/color]"
                     on_press: app.screen_manager.current = 'play'  # the lite version go straight to play no to menu
 
                 Widget:
@@ -50,11 +51,12 @@
                     orientation: 'vertical'
 
                     PresentationLabel:
-                        text: "© Board Discovery GiftyGames® 2016.\n All rights reserved."
+                        text: "juegos en: \n [ref=''][color=#dec07b]" + app.GIFTY_GAME_WEB_SITE +"[/color][/ref]"
+                        texture_path: os.path.join("assets", "images", "app_graphics", "wrong_points_texture.jpg")
+                        on_ref_press: app.visit_gifty_games()
 
                     PresentationLabel:
-                        text: "Get more games on: \n [ref=''][color=#dec07b]http://play.google.com/giftygames[/color][/ref]"
-                        on_ref_press: app.visit_gifty_games("http://play.google.com/giftygames")
+                        text: "© Board Discovery GiftyPlay® 2016"
             Widget:
                 size_hint: [0.25, 1]
 

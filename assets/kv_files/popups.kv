@@ -1,38 +1,58 @@
-<GameLoseView>:
+<ModalViewBD@ModalView>:
+    auto_dismiss: False
+    on_open: self.start_open_animations()
+    canvas:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
+            pos:self.pos
+            size:self.size
+
+<ActionButton@Button>:
+    background_color: [0] * 4
+    image_back: "display_color_time_box4.png"
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", self.image_back)
+            pos:self.pos
+            size:self.size
+
+    user_text: "Continuar"
+    markup: True
+    text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "] " + self.user_text + " [/size]"
+
+
+<GameLoseView@ModalViewBD>:
     repeat_level_bttn: repeat_level_bttn_id
-    title: "Sorry you lose!"
-    size_hint: [0.5, 0.5]
+    size_hint: [0.8, 0.8]
 
-    BoxLayout:
-        orientation: "vertical"
+    FloatLayout:
+        Label:
+            id: status_label
+            text:  "Has Perdido"
+            size_hint: [0.5, 0.2]
+            pos: root.width * 0.25, root.height * 0.8
+            font_size: min(int(self.height * 0.6) , int(self.width / 8.0 ))
 
-        BoxLayout:
-            size_hint: [1, 0.6]
-
-        Button:
+        ActionButton:
             id: repeat_level_bttn_id
-            text: "Repeat Level"
-            size_hint: [0.5, 0.2]
-            pos: root.width * 0.5, root.height * 0.5
+            user_text: "Repetir Nivel"
+            image_back: "display_color_time_box4.png"
+            size_hint: [0.5, 0.1]
+            pos: root.width * 0.5, root.height * 0.1
             on_press: root.dismiss()
 
 
-
-<GameWinView>:
+<GameWinView@ModalViewBD>:
     continue_playing_bttn: continue_playing_bttn_id
-    title: "Congratulations!!!"
-    size_hint: [0.5, 0.5]
+    size_hint: [0.8, 0.8]
 
-    BoxLayout:
-        orientation: "vertical"
-
-        BoxLayout:
-            size_hint: [1, 0.6]
-
-        Button:
+    FloatLayout:
+        ActionButton:
             id: continue_playing_bttn_id
-            text: "Continue"
+            user_text: "Continuar"
+            image_back: "display_color_time_box4.png"
             size_hint: [0.5, 0.2]
             pos: root.width * 0.5, root.height * 0.5
             on_press: root.dismiss()
+
 

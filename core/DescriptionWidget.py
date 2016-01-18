@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 from kivy._event import EventDispatcher
+from kivy.graphics.context_instructions import Color
+from kivy.graphics.vertex_instructions import Rectangle
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty, ListProperty
@@ -13,10 +15,16 @@ class ShadowLabel(Label):
     decal = ListProperty([0, 0])
     tint = ListProperty([1, 1, 1, 1])
 
+
 class ColoredLabel(Label):
 
     def __init__(self, **kwargs):
         Label.__init__(self, **kwargs)
+
+        self.transparency = 0.5
+
+        self.canvas.before.add(Color(rgba=[0, 0, 0, self.transparency]))
+        self.canvas.before.add(Rectangle(pos=self.pos, size=self.size))
 
 
 class DescriptionName(BoxLayout):

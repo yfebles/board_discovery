@@ -1,22 +1,21 @@
 #:import os os
+#:import Image kivy.core.image.Image
 
 <RoundedButton@Button>:
     background_color: [0] * 4
     markup: True
-
+    image_back: "display_color_time_box4.png"
     canvas.before:
 
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", "bttn_menu_color.png")
+            source: os.path.join("assets","images","app_graphics", self.image_back)
             pos: self.pos
             size: self.size
 
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", "bttn_menu_shine.png")
+            source: os.path.join("assets","images","app_graphics", "presentation_btn_shine.png")
             pos: self.pos
             size: self.size
-
-    on_touch_down: app.sounds.play_click_sound()
 
 
 <RobotoLabel@Label>:
@@ -66,21 +65,26 @@
     user_text: ""
     text: "[color=#96875a]" + self.user_text + "[/color]"
 
+    image_back: "function_btn_border.png"
     canvas.before:
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", "function_btn_border.png")
+            source: os.path.join("assets","images","app_graphics", self.image_back)
             pos: self.pos[0] + self.size[0] / 2.0 - min(self.size[0], self.size[1]) / 2.0 , self.pos[1] + self.size[1] / 2.0 - min(self.size[0], self.size[1]) / 2.0
             size: min(self.size[0], self.size[1]), min(self.size[0], self.size[1])
 
-    on_touch_down: app.sounds.play_click_sound(), app.open_settings()
+    on_touch_down: app.sounds.play_click_sound()
 
 <ShadowLabel>:
     decal: 2, -2
     tint: 0, 0, 0, 1
 
+    texture_path: os.path.join("assets","images","app_graphics", "almost_points_texture.jpg")
+
+    texture: Image(self.texture_path).texture
+
     canvas.before:
         Color:
-            rgba: root.tint
+            rgba: root.tint   # shadow in black
 
         Rectangle:
             pos:
@@ -98,7 +102,8 @@
     font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
     font_size: min(self.width, self.height) * 0.5
     background_color:[0] * 4
-    text: ""
+    markup:True
+    text: "[color=#727272][/color]"
 
     canvas.before:
         Rectangle:
@@ -165,7 +170,6 @@
     id: colored_label
 
     transparency: 0.5
-
     canvas.before:
         Color:
             rgba: [0,0,0, colored_label.transparency]
@@ -228,7 +232,7 @@
         background_color: [0] * 4
         markup: True
         text_color: "#000000"
-        pos: description_widget.pos[0] + description_widget.width * 0.85, description_widget.pos[1] + description_widget.height * 0.85
+        pos: description_widget.pos[0] + description_widget.width * 0.82, description_widget.pos[1] + description_widget.height * 0.82
         text: "[color=" + self.text_color + "]  [/color]"
         font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
         font_size: min(self.width, self.height) * 0.7
@@ -258,6 +262,5 @@
 <PresentationLabel@CenteredLabel+ShadowLabel>:
     markup: True
     font_size: min(self.width / 10, 20)
-
 
 

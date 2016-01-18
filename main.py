@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import os
 import webbrowser
 from kivy.app import App
+from kivy.core.image import Image
 from core.screens import *
 from core.Sounds import Sounds
 from core.Configs import Configs
@@ -19,7 +22,7 @@ class GameApp(App):
     ANDROID_BACK_BUTTON_CODE = 1000
 
     KV_FILE_PATH = os.path.join("assets", "kv_files", "menu_screen.kv")
-    GIFTY_GAME_WEB_SITE = "http://play.google.com/giftygames"
+    GIFTY_GAME_WEB_SITE = "http://play.google.com/giftyplay"
 
     # endregion
 

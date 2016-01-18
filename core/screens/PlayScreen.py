@@ -3,11 +3,11 @@
 import random
 from math import sqrt
 from kivy.app import App
+from core.Utils import *
 from kivy.uix.modalview import ModalView
 from kivy.animation import Animation
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty, Clock
-
 from core.Sounds import Sounds
 from core.db.db_orm import DB
 from core.BoardCell import BoardCell
@@ -15,12 +15,22 @@ from core.LevelManager import LevelManager
 from core.DescriptionWidget import DescriptionWidget
 
 
-class GameWinView(ModalView):
+class ModalViewBD(ModalView):
+    pass
+
+
+class GameWinView(ModalViewBD):
     continue_playing_bttn = ObjectProperty()
 
+    def start_open_animations(self):
+        print("open")
 
-class GameLoseView(ModalView):
+
+class GameLoseView(ModalViewBD):
     repeat_level_bttn = ObjectProperty()
+
+    def start_open_animations(self):
+        print("open")
 
 
 class PlayScreen(Screen):
@@ -75,8 +85,6 @@ class PlayScreen(Screen):
 
         self.board = []
         self.cell_selected, self.second_cell_selected, self.current_level = [None] * 3
-
-        self.pairing_cells_on_going = False
 
         # win and lose level animations widgets (Popups by now)
         self.lose_popup = GameLoseView()
@@ -171,7 +179,7 @@ class PlayScreen(Screen):
         self.time_sec = level.time_seg
 
         self.board_widget.clear_widgets()
-        self.cell_selected, self.second_cell_selected = [None] * 2
+        self.cell_selected, self.second_cell_selected = None, None
 
         self.board = [[] for _ in xrange(cols)]
 
@@ -257,14 +265,12 @@ class PlayScreen(Screen):
             Clock.schedule_once(self.win_popup.open, timeout=1)
 
     def cell_pressed(self, board_cell):
-        if self.pairing_cells_on_going or self.current_level is None or self.is_descp_visible():
+        if self.game_paused or self.current_level is None or self.is_descp_visible() or \
+           (self.cell_selected is not None and self.second_cell_selected is not None):
             return
 
         if board_cell.visible:
             self.show_descp_widget(board_cell.center, board_cell)
-            return
-
-        if self.game_paused:
             return
 
         board_cell.visible = True
@@ -280,7 +286,6 @@ class PlayScreen(Screen):
             # play un-paired sound if must be
             Sounds().play_cell_paired_wrong_sound()
 
-            self.pairing_cells_on_going = True
             self.second_cell_selected = board_cell
             Clock.schedule_once(self.pair_cells_failed_restore, timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.5)
             return
@@ -288,8 +293,11 @@ class PlayScreen(Screen):
         # play paired sound if must be
         Sounds().play_cell_paired_ok_sound()
 
-        # if related cells
-        self.points += self.current_level.points
+        # if related cells show points
+        self.points += self.current_level.points * 2
+
+        Clock.schedule_once(lambda obj: self.create_points_effect(self.cell_selected), 0.1)
+        Clock.schedule_once(lambda obj: self.create_points_effect(board_cell), 0.3)
 
         self.cell_selected = None
 
@@ -297,29 +305,11 @@ class PlayScreen(Screen):
         self.check_game_state()
 
     def pair_cells_failed_restore(self, obj=None):
-
         self.second_cell_selected.visible = False
         self.cell_selected.visible = False
+
+        self.second_cell_selected = None
         self.cell_selected = None
-
-        self.pairing_cells_on_going = False
-
-    def discover_cells(self, i, j):
-        """
-        Method that discover all the cells adjacent
-        to the position supplied
-        :param i: row of the cell to center the discovery in
-        :param j: col of the cell to center the discovery in
-        :return:
-        """
-        # directions up, down, left and right
-        adjacent_cells = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
-
-        for row, col in adjacent_cells:
-            if 0 <= row < self.columns and 0 <= col < self.columns and not self.board[row][col].visible:
-                self.points += self.current_level.points
-                self.board[row][col].visible = True
-                return
 
     # endregion
 
@@ -397,6 +387,33 @@ class PlayScreen(Screen):
     def remove_descp_widget(self, obj=None, button=None):
         self.board_widget.remove_widget(self.description_widget)
         self.description_widget.pos = self.board_widget.pos
+
+    # endregion
+
+    # region Effects
+
+    def remove_widget_later(self, widget, time=1):
+        function = lambda obj: self.board_widget.remove_widget(widget)
+        Clock.schedule_once(function, timeout=time)
+
+    def create_points_effect(self, board_cell):
+
+        lbl = WellDoneLabel(text=str(self.current_level.points))
+
+        x_orig, y_orig = board_cell.pos[0], board_cell.pos[1]
+        x_orig -= self.board_widget.width / 2.0
+        y_orig -= self.board_widget.height / 2.0
+
+        lbl.pos = x_orig + board_cell.width / 2.0, y_orig
+
+        x_end, y_end = x_orig + board_cell.width, y_orig + board_cell.height
+
+        anim = Animation(x=x_end, y=y_end)
+        anim &= Animation(opacity=0)
+        anim.start(lbl)
+
+        self.board_widget.add_widget(lbl)
+        self.remove_widget_later(lbl)
 
     # endregion
 

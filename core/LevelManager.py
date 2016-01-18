@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from core.db.db_orm import DB, Level, Package, Statistics
 
 

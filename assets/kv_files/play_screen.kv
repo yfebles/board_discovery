@@ -19,7 +19,7 @@
     canvas:
         Rectangle:
             id: back_image_id
-            source: os.path.join("assets","images","app_graphics", "menu_back.png")
+            source: os.path.join("assets","images","app_graphics", self.back_image)
             pos:self.pos
             size:self.size
 
@@ -47,7 +47,6 @@
 
             # time box
             BoxLayout:
-
 
                 DisplayBoxHorizontal:
                     id: time_box
@@ -107,8 +106,9 @@
                 size_hint: [0.6, 1]
                 padding: [0,self.height/20  ,0, self.height/20]
 
-                RobotoLabel:
-                    text: "MONEY"
+                Label:
+                    font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+                    text: "Puntos"
 
                 CenteredLabel:
                     id: points_label_id
@@ -122,10 +122,12 @@
                 size_hint: [0.35, 1]
                 padding: [0,0,0,self.height/20]
 
-                RobotoLabel:
-                    text: "HINTS"
+                Label:
+                    font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+                    text: "Pistas"
 
                 CenteredLabel:
                     id: lives_label_id
                     text: "0"
                     font_size: points_label_id.font_size
+
