@@ -23,6 +23,7 @@
 
 <GameLoseView@ModalViewBD>:
     repeat_level_bttn: repeat_level_bttn_id
+
     size_hint: [0.8, 0.8]
 
     FloatLayout:
@@ -55,4 +56,22 @@
             pos: root.width * 0.5, root.height * 0.5
             on_press: root.dismiss()
 
+<HowToPlay@ModalView>:
+    close_bttn: close_bttn_id
+    size_hint: [0.8, 0.8]
 
+    auto_dismiss: False
+    canvas:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
+            pos:self.pos
+            size:self.size
+
+    FloatLayout:
+        ActionButton:
+            id: close_bttn_id
+            user_text: "Continuar"
+            image_back: "display_color_time_box4.png"
+            size_hint: [0.5, 0.2]
+            pos: root.width * 0.5, root.height * 0.5
+            on_press: root.dismiss()

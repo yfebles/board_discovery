@@ -33,6 +33,10 @@ class GameLoseView(ModalViewBD):
         print("open")
 
 
+class HowToPlay(ModalView):
+    close_bttn = ObjectProperty()
+
+
 class PlayScreen(Screen):
     """
     In several methods an argument dt is supplied
@@ -94,6 +98,10 @@ class PlayScreen(Screen):
         self.win_popup = GameWinView()
         self.win_popup.color = [0] * 4
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
+
+        self.how_to_play_popup = HowToPlay()
+        # self.lose_popup.color = [0] * 4
+        self.how_to_play_popup.close_bttn.bind(on_press=lambda obj: self.play())
 
         Clock.schedule_interval(self.update_time, timeout=1)
 
@@ -176,7 +184,7 @@ class PlayScreen(Screen):
             raise Exception("The board must have at least 2x2 cells")
 
         self.points = 0
-        self.time_sec = level.time_seg
+        self.time_sec = 2 #level.time_seg
 
         self.board_widget.clear_widgets()
         self.cell_selected, self.second_cell_selected = None, None
@@ -265,13 +273,14 @@ class PlayScreen(Screen):
             Clock.schedule_once(self.win_popup.open, timeout=1)
 
     def cell_pressed(self, board_cell):
-        if self.game_paused or self.current_level is None or self.is_descp_visible() or \
-           (self.cell_selected is not None and self.second_cell_selected is not None):
+        if self.game_paused or self.current_level is None or self.is_descp_visible() or board_cell.locked:
             return
 
         if board_cell.visible:
             self.show_descp_widget(board_cell.center, board_cell)
             return
+
+        board_cell.locked = True
 
         board_cell.visible = True
 
@@ -286,30 +295,32 @@ class PlayScreen(Screen):
             # play un-paired sound if must be
             Sounds().play_cell_paired_wrong_sound()
 
-            self.second_cell_selected = board_cell
-            Clock.schedule_once(self.pair_cells_failed_restore, timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.5)
+            row, col, row1, col1 = self.cell_selected.row, self.cell_selected.col, board_cell.row, board_cell.col
+            self.cell_selected = None
+
+            Clock.schedule_once(lambda obj: self.pair_cells_failed_restore(row, col, row1, col1),
+                                timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.5)
             return
 
         # play paired sound if must be
         Sounds().play_cell_paired_ok_sound()
 
         # if related cells show points
-        self.points += self.current_level.points * 2
 
-        Clock.schedule_once(lambda obj: self.create_points_effect(self.cell_selected), 0.1)
-        Clock.schedule_once(lambda obj: self.create_points_effect(board_cell), 0.3)
+        pos, w, h = self.cell_selected.pos, self.cell_selected.width, self.cell_selected.height
+        pos1, w1, h1 = board_cell.pos, board_cell.width, board_cell.height
+
+        Clock.schedule_once(lambda obj: self.create_points_effect(pos, w, h), 0.1)
+        Clock.schedule_once(lambda obj: self.create_points_effect(pos1, w1, h1), 0.3)
 
         self.cell_selected = None
 
         # check if the game has been wined
         self.check_game_state()
 
-    def pair_cells_failed_restore(self, obj=None):
-        self.second_cell_selected.visible = False
-        self.cell_selected.visible = False
-
-        self.second_cell_selected = None
-        self.cell_selected = None
+    def pair_cells_failed_restore(self, i=0, j=0, i1=0, j1=0):
+        self.board[i][j].visible = False
+        self.board[i1][j1].visible = False
 
     # endregion
 
@@ -396,20 +407,24 @@ class PlayScreen(Screen):
         function = lambda obj: self.board_widget.remove_widget(widget)
         Clock.schedule_once(function, timeout=time)
 
-    def create_points_effect(self, board_cell):
+    def create_points_effect(self, pos, width, height):
+        self.points += self.current_level.points
 
         lbl = WellDoneLabel(text=str(self.current_level.points))
 
-        x_orig, y_orig = board_cell.pos[0], board_cell.pos[1]
+
+        x_orig, y_orig = pos[0], pos[1]
         x_orig -= self.board_widget.width / 2.0
         y_orig -= self.board_widget.height / 2.0
 
-        lbl.pos = x_orig + board_cell.width / 2.0, y_orig
+        lbl.pos = x_orig + width / 2.0, y_orig
 
-        x_end, y_end = x_orig + board_cell.width, y_orig + board_cell.height
+        x_end, y_end = x_orig + width, y_orig + height
 
-        anim = Animation(x=x_end, y=y_end)
-        anim &= Animation(opacity=0)
+        anim = Animation(opacity=0)
+        anim &= Animation(x=x_end, y=y_end)
+        anim &= Animation(font_size=lbl.font_size * 2)
+
         anim.start(lbl)
 
         self.board_widget.add_widget(lbl)
@@ -444,3 +459,13 @@ class PlayScreen(Screen):
         self.pause()
 
         App.get_running_app().open_settings()
+
+    def display_how_to_play(self):
+        """
+        Method that display settings on the screen
+        :return:
+        """
+        self.pause()
+
+        self.how_to_play_popup.open()
+

@@ -40,7 +40,7 @@ class BoardCell(Button, EventDispatcher):
         self.row, self.col = row, col
 
         # visibility, active and selection state of the cell
-        self._visible, self._active, self._selected, self.animation_ongoing = [False] * 4
+        self._visible, self._active, self._selected, self.animation_ongoing, self.locked = [False] * 5
 
         self.flip_animation = None
 

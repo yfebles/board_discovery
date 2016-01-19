@@ -4,11 +4,13 @@
 <RoundedButton@Button>:
     background_color: [0] * 4
     markup: True
+
+    pressed: False
     image_back: "display_color_time_box4.png"
     canvas.before:
 
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", self.image_back)
+            source: os.path.join("assets","images","app_graphics", self.image_back if not self.pressed else "display_color_time_box3.png")
             pos: self.pos
             size: self.size
 
@@ -16,6 +18,9 @@
             source: os.path.join("assets","images","app_graphics", "presentation_btn_shine.png")
             pos: self.pos
             size: self.size
+
+    on_touch_down: app.sounds.play_click_sound()
+    on_touch_up: self.pressed=False
 
 
 <RobotoLabel@Label>:
@@ -66,13 +71,17 @@
     text: "[color=#96875a]" + self.user_text + "[/color]"
 
     image_back: "function_btn_border.png"
+    image_back_pressed: "function_btn_border.png"
+    pressed: False
+
     canvas.before:
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", self.image_back)
+            source: os.path.join("assets","images","app_graphics", self.image_back if not self.pressed else self.image_back_pressed)
             pos: self.pos[0] + self.size[0] / 2.0 - min(self.size[0], self.size[1]) / 2.0 , self.pos[1] + self.size[1] / 2.0 - min(self.size[0], self.size[1]) / 2.0
             size: min(self.size[0], self.size[1]), min(self.size[0], self.size[1])
 
     on_touch_down: app.sounds.play_click_sound()
+    on_touch_up: self.pressed = False
 
 <ShadowLabel>:
     decal: 2, -2

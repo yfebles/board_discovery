@@ -22,7 +22,9 @@ class GameApp(App):
     ANDROID_BACK_BUTTON_CODE = 1000
 
     KV_FILE_PATH = os.path.join("assets", "kv_files", "menu_screen.kv")
-    GIFTY_GAME_WEB_SITE = "http://play.google.com/giftyplay"
+    PLAY_STORE_PAGE = "http://play.google.com/giftyplay"
+    FB_PAGE = "https://www.facebook.com/GiftyGames-613182575451414/"
+    TWITTER_PAGE = "https://www.twitter.com"
 
     # endregion
 
@@ -35,7 +37,7 @@ class GameApp(App):
 
         # set the transition manager between screens
         self.screen_manager = ScreenManager()
-        self.screen_manager.transition = FadeTransition(duration=0.1)
+        self.screen_manager.transition = FadeTransition(duration=0.4)
 
         # set the screens configuration
         self.presentation_screen = PresentationScreen(name='presentation')
@@ -151,17 +153,29 @@ class GameApp(App):
 
     # endregion
 
-    def translate(self, text):
-        pass
-
     def load_level(self, obj, level):
         self.play_screen.pause()
         self.play_screen.load_level(level)
         self.screen_manager.current = 'play'
 
-    def visit_gifty_games(self, obj=None):
-        webbrowser.open(self.GIFTY_GAME_WEB_SITE)
+    # region Visit Page
 
+    def visit_page(self, obj=None, url=""):
+        webbrowser.open(url)
+
+    def visit_fb_page(self, obj=None):
+        webbrowser.open(self.FB_PAGE)
+
+    def visit_twitter_page(self, obj=None):
+        webbrowser.open(self.TWITTER_PAGE)
+
+    def visit_googleplay_page(self, obj=None):
+        webbrowser.open(self.PLAY_STORE_PAGE)
+
+    # endregion
+
+    def translate(self, text):
+        return text
 
 if __name__ == '__main__':
     app = GameApp()
