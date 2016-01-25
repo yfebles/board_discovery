@@ -2,7 +2,6 @@ from kivy.uix.button import Button
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
-from core.BoardCell import LevelBoardCell
 from core.LevelManager import LevelManager
 
 
@@ -24,10 +23,7 @@ class LevelsScreen(Screen, EventDispatcher):
 
         self.levels_grid.clear_widgets()
 
-        # load the levels as
-        for index, level in enumerate(self.level_manager.levels):
 
-            self.levels_grid.add_widget(LevelBoardCell(size_hint_y=None, on_touch_down=self.raise_open_level(index)))
 
     def raise_open_level(self, index):
         return lambda obj, obj2: self.dispatch("on_open_level", self.level_manager.levels[index])

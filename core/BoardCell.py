@@ -4,11 +4,7 @@ from kivy.uix.button import Button
 from kivy.animation import Animation
 from kivy.event import EventDispatcher
 from kivy.graphics.vertex_instructions import Rectangle
-
-
-class LevelBoardCell(BoxLayout):
-    def __init__(self, **kwargs):
-        BoxLayout.__init__(self, **kwargs)
+from core.Sounds import Sounds
 
 
 class BoardCell(Button, EventDispatcher):
@@ -35,22 +31,24 @@ class BoardCell(Button, EventDispatcher):
         Button.__init__(self, **kwargs)
         super(EventDispatcher, self).__init__(**kwargs)
 
-        self.register_event_type("on_flip")
-
         self.row, self.col = row, col
 
+        self.unlocked_action = None
+
         # visibility, active and selection state of the cell
-        self._visible, self._active, self._selected, self.animation_ongoing, self.locked = [False] * 5
+        self._visible, self.locked = False, False
 
         self.flip_animation = None
+
+        self.vibrate_animation = None
 
         self.level_item = level_item
 
         self.item_image_canvas_instruction = []
 
-    def on_flip(self):
+    def on_animation_ended(self):
         """
-        Event fired when the cell has been flipped
+        Event raised when a board cell animation has ended
         :return:
         """
         pass
@@ -66,10 +64,10 @@ class BoardCell(Button, EventDispatcher):
         if self._visible == value:
             return
 
-        self._visible = value
+        if self.locked:
+            raise Exception("Invalid operation on lock")
 
-        if self.flip_animation:
-            self.flip_animation.cancel(self)
+        self._visible = value
 
         self.flip()
 
@@ -80,32 +78,21 @@ class BoardCell(Button, EventDispatcher):
     @property
     def description(self):
         descp = self.level_item.description
+
         return "" if descp is None else descp
 
     @property
     def image(self):
-        return os.path.join(self.IMG_PATH, "naranja.jpg" if not self.level_item.image else self.level_item.image)
-
-    # endregion
-
-    # region Future Use
-
-    @property
-    def active(self):
-        return self._active
-
-    @property
-    def selected(self):
-        return self._selected
-
-    @selected.setter
-    def selected(self, value):
-        self._selected = value
+        return os.path.join(self.IMG_PATH, "" if not self.level_item.image else self.level_item.image)
 
     # endregion
 
     def release_animation(self, obj=None, button=None):
-        self.animation_ongoing = False
+        self.locked = False
+
+        if self.unlocked_action is not None:
+            self.unlocked_action()
+            self.unlocked_action = None
 
     def between_flip_change(self, obj=None, button=None):
         if self.visible:
@@ -115,16 +102,18 @@ class BoardCell(Button, EventDispatcher):
             self.canvas.after.clear()
 
     def flip(self):
-        if self.animation_ongoing:
-            return
+        if self.locked:
+            raise Exception("Invalid Operation on lock")
 
-        self.animation_ongoing = True
+        self.locked = True
 
         old_x = self.pos[0]
         old_width = self.size_hint_x
 
         self.item_image_canvas_instruction = []
-        self.item_image_canvas_instruction.append(Rectangle(source=self.image, pos=self.pos, size=self.size))
+        shift_pos = self.pos[0] - self.width * 0.02, self.pos[1] - self.height * 0.02
+        scaled_size = self.size[0] * 1.04, self.size[1] * 1.04
+        self.item_image_canvas_instruction.append(Rectangle(source=self.image, pos=shift_pos, size=scaled_size))
 
         self.flip_animation = Animation(size_hint_x=0, x=old_x + self.width / 2, duration=self.DESCP_SHOW_DELAY_TIME / 2)
 
@@ -135,5 +124,5 @@ class BoardCell(Button, EventDispatcher):
 
         self.flip_animation.start(self)
 
-        self.dispatch("on_flip")
+        Sounds().play_cell_flip_sound()
 

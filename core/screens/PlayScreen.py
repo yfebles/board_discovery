@@ -90,18 +90,22 @@ class PlayScreen(Screen):
         self.board = []
         self.cell_selected, self.second_cell_selected, self.current_level = [None] * 3
 
+        # list with the randomized operations of the last loaded level
+        self.randomized_positions = []
+
         # win and lose level animations widgets (Popups by now)
         self.lose_popup = GameLoseView()
         self.lose_popup.color = [0] * 4
-        self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level))
+        self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level, re_load=True))
 
         self.win_popup = GameWinView()
         self.win_popup.color = [0] * 4
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
         self.how_to_play_popup = HowToPlay()
+
         # self.lose_popup.color = [0] * 4
-        self.how_to_play_popup.close_bttn.bind(on_press=lambda obj: self.play())
+        self.how_to_play_popup.close_bttn.bind(on_press=lambda obj: self.play() if not self.is_descp_visible() else None)
 
         Clock.schedule_interval(self.update_time, timeout=1)
 
@@ -171,7 +175,7 @@ class PlayScreen(Screen):
 
         self.load_next_level()
 
-    def load_level(self, level):
+    def load_level(self, level, re_load=False):
         """
         Load into the play screen the data of the level supplied
         :param level: the level supplied (if any) else try to load the next
@@ -183,11 +187,12 @@ class PlayScreen(Screen):
         if cols < 2:
             raise Exception("The board must have at least 2x2 cells")
 
+
         self.points = 0
-        self.time_sec = 2 #level.time_seg
+        self.time_sec = level.time_seg
+        self.cell_selected, self.second_cell_selected = None, None
 
         self.board_widget.clear_widgets()
-        self.cell_selected, self.second_cell_selected = None, None
 
         self.board = [[] for _ in xrange(cols)]
 
@@ -200,16 +205,16 @@ class PlayScreen(Screen):
 
                 self.board_widget.add_widget(board_cell)
                 board_cell.bind(on_press=self.cell_pressed)
-                board_cell.bind(on_flip=self.cell_flipped)
+
+        if not re_load:
+            self.randomized_positions = [[random.randint(0, cols - 1) for _ in range(4)] for _ in xrange(cols * cols)]
 
         # randomize the level with cols^2 changes
-        for _ in xrange(cols * cols):
-            row, column = random.randint(0, cols - 1), random.randint(0, cols - 1)
-            row1, column1 = random.randint(0, cols - 1), random.randint(0, cols - 1)
+        for r in self.randomized_positions:
 
-            temp = self.board[row][column]
-            self.board[row][column] = self.board[row1][column1]
-            self.board[row1][column1] = temp
+            temp = self.board[r[0]][r[1]]
+            self.board[r[0]][r[1]] = self.board[r[2]][r[3]]
+            self.board[r[2]][r[3]] = temp
 
         self.update_cells_positions()
         self.hide_descp_widget()
@@ -247,13 +252,6 @@ class PlayScreen(Screen):
 
     # region Game Behavior
 
-    def cell_flipped(self, obj=None):
-        """
-        Callback for when a cell has been flipped
-        :return:
-        """
-        Sounds().play_cell_flip_sound()
-
     def check_game_state(self):
         """
         checks if the game is finished or not.
@@ -273,14 +271,12 @@ class PlayScreen(Screen):
             Clock.schedule_once(self.win_popup.open, timeout=1)
 
     def cell_pressed(self, board_cell):
-        if self.game_paused or self.current_level is None or self.is_descp_visible() or board_cell.locked:
-            return
-
         if board_cell.visible:
             self.show_descp_widget(board_cell.center, board_cell)
             return
 
-        board_cell.locked = True
+        if board_cell.locked or self.game_paused or self.current_level is None or self.is_descp_visible():
+            return
 
         board_cell.visible = True
 
@@ -289,38 +285,40 @@ class PlayScreen(Screen):
             self.cell_selected = board_cell
             return
 
-        # if the two cells are not related hide them
-        if not self.current_level.are_connected(self.cell_selected.level_item, board_cell.level_item):
+        cells_related = self.current_level.are_connected(self.cell_selected.level_item, board_cell.level_item)
 
-            # play un-paired sound if must be
-            Sounds().play_cell_paired_wrong_sound()
+        cell_selected = self.cell_selected
+        self.cell_selected = None
 
-            row, col, row1, col1 = self.cell_selected.row, self.cell_selected.col, board_cell.row, board_cell.col
-            self.cell_selected = None
+        if cells_related:
+            action = lambda: self.cell_paired_ok(cell_selected, board_cell)
+        else:
+            action = lambda: self.cell_paired_failed(cell_selected, board_cell)
 
-            Clock.schedule_once(lambda obj: self.pair_cells_failed_restore(row, col, row1, col1),
-                                timeout=board_cell.DESCP_SHOW_DELAY_TIME * 1.5)
-            return
+        board_cell.unlocked_action = action
 
+    def cell_paired_ok(self, cell_selected, board_cell):
         # play paired sound if must be
         Sounds().play_cell_paired_ok_sound()
 
         # if related cells show points
-
-        pos, w, h = self.cell_selected.pos, self.cell_selected.width, self.cell_selected.height
+        pos, w, h = cell_selected.pos, cell_selected.width, cell_selected.height
         pos1, w1, h1 = board_cell.pos, board_cell.width, board_cell.height
 
         Clock.schedule_once(lambda obj: self.create_points_effect(pos, w, h), 0.1)
         Clock.schedule_once(lambda obj: self.create_points_effect(pos1, w1, h1), 0.3)
 
-        self.cell_selected = None
-
         # check if the game has been wined
         self.check_game_state()
 
-    def pair_cells_failed_restore(self, i=0, j=0, i1=0, j1=0):
-        self.board[i][j].visible = False
-        self.board[i1][j1].visible = False
+    def cell_paired_failed(self, cell_selected, board_cell):
+        # play un-paired sound if must be
+        Sounds().play_cell_paired_wrong_sound()
+
+        cell_selected.visible = False
+        board_cell.visible = False
+
+        board_cell.unbind()
 
     # endregion
 
@@ -410,20 +408,34 @@ class PlayScreen(Screen):
     def create_points_effect(self, pos, width, height):
         self.points += self.current_level.points
 
+        animation_type = random.random()
+
         lbl = WellDoneLabel(text=str(self.current_level.points))
 
-
-        x_orig, y_orig = pos[0], pos[1]
-        x_orig -= self.board_widget.width / 2.0
-        y_orig -= self.board_widget.height / 2.0
-
-        lbl.pos = x_orig + width / 2.0, y_orig
-
-        x_end, y_end = x_orig + width, y_orig + height
+        x_orig, y_orig = pos[0] - self.board_widget.width / 2.0, pos[1] - self.board_widget.height / 2.0
 
         anim = Animation(opacity=0)
+        anim &= Animation(font_size=lbl.font_size * 1.5)
+
+        if animation_type < 0.3:
+            # from the bottom center to right upper corner
+            x_end = x_orig + width
+            x_orig += width / 2.0
+
+        elif animation_type < 0.65:
+            # from the bottom center to upper center
+            x_end = x_orig + width / 2.0
+            x_orig += width / 2.0
+
+        else:
+            # from the bottom right to left upper corner
+            x_end = x_orig
+            x_orig += width
+
+        y_end = y_orig + height
+
+        lbl.pos = x_orig, y_orig
         anim &= Animation(x=x_end, y=y_end)
-        anim &= Animation(font_size=lbl.font_size * 2)
 
         anim.start(lbl)
 
