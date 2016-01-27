@@ -46,7 +46,6 @@
                     text: "[color=#ffffff][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "]Jugar[/size][/color]"
                     on_press: app.screen_manager.current, self.pressed = 'play', not self.pressed  # the lite version go straight to play no to menu
 
-
                 Widget:
                     size_hint: [1, 0.3]
 
@@ -80,14 +79,12 @@
 
                         Button:
                             size_hint: [0.20, 0.5]
-                            background_color: [0] * 4
+
                             font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
                             font_size: min(self.width, self.height)
-
-                            text: ""
+                            background_color: [0] * 4
+                            text: ""
                             on_press: Clock.schedule_once(app.open_settings, timeout=0.2)
-                            on_touch_down: self.font_size=min(self.width, self.height) * 2
-                            on_touch_up: self.font_size=min(self.width, self.height)
 
                     PresentationLabel:
                         text: "[color=#dec07b]Board Discovery\n[/color] GiftyPlay"

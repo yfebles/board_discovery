@@ -1,11 +1,9 @@
+#:import os os
 <ModalViewBD@ModalView>:
     auto_dismiss: False
+    color: [0] * 4
     on_open: self.start_open_animations()
-    canvas:
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
-            pos:self.pos
-            size:self.size
+    background: os.path.join("assets","images","app_graphics", "menu_back.jpg")
 
 <ActionButton@Button>:
     background_color: [0] * 4
@@ -23,29 +21,46 @@
 
 <GameLoseView@ModalViewBD>:
     repeat_level_bttn: repeat_level_bttn_id
+    board_widget: board_widget_id
+    container_layout:container_layout_id
 
-    size_hint: [0.8, 0.8]
+    size_hint: [0.9, 0.9]
 
     FloatLayout:
+        id: container_layout_id
         Label:
-            id: status_label
-            text:  "Has Perdido"
-            size_hint: [0.5, 0.2]
-            pos: root.width * 0.25, root.height * 0.8
-            font_size: min(int(self.height * 0.6) , int(self.width / 8.0 ))
+            text: "Has perdido"
+            pos: root.pos[0] + root.width * 0.1, root.pos[1] + root.height * 0.9
+            font_size: min(self.height *0.8, self.width / len(self.text) * 1.0)
+            size_hint: [0.8, 0.1]
+
+        Widget: # background image
+            id: board_widget_id
+            canvas.before:
+                Rectangle:
+                    source: os.path.join("assets","images","app_graphics", "back_item_cell.png")
+                    pos: self.pos
+                    size: self.size
+
+            opacity: 0.5
+            pos: root.pos[0] + root.width * 0.05, root.pos[1] + root.height * 0.15
+            font_size: self.width / 10.0
+            size_hint: [0.9, 0.7]
+
+        # other animations from x [0.15, 0.85] and y [0.15, 0.85]
 
         ActionButton:
             id: repeat_level_bttn_id
+            opacity: 0
+            pos: root.pos[0] + root.width, root.pos[1] + root.height * 0.025
             user_text: "Repetir Nivel"
-            image_back: "display_color_time_box4.png"
             size_hint: [0.5, 0.1]
-            pos: root.width * 0.5, root.height * 0.1
             on_press: root.dismiss()
 
 
 <GameWinView@ModalViewBD>:
     continue_playing_bttn: continue_playing_bttn_id
-    size_hint: [0.8, 0.8]
+    size_hint: [0.9, 0.9]
 
     FloatLayout:
         ActionButton:
@@ -59,13 +74,6 @@
 <HowToPlay@ModalView>:
     close_bttn: close_bttn_id
     size_hint: [0.8, 0.8]
-
-    auto_dismiss: False
-    canvas:
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", "menu_back.jpg")
-            pos:self.pos
-            size:self.size
 
     FloatLayout:
         ActionButton:

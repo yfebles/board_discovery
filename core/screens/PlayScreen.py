@@ -2,39 +2,19 @@
 
 import random
 from math import sqrt
+
 from kivy.app import App
-from core.Utils import *
-from kivy.uix.modalview import ModalView
 from kivy.animation import Animation
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty, Clock
+
+from core.Utils import *
 from core.Sounds import Sounds
 from core.db.db_orm import DB
 from core.BoardCell import BoardCell
 from core.LevelManager import LevelManager
 from core.DescriptionWidget import DescriptionWidget
-
-
-class ModalViewBD(ModalView):
-    pass
-
-
-class GameWinView(ModalViewBD):
-    continue_playing_bttn = ObjectProperty()
-
-    def start_open_animations(self):
-        print("open")
-
-
-class GameLoseView(ModalViewBD):
-    repeat_level_bttn = ObjectProperty()
-
-    def start_open_animations(self):
-        print("open")
-
-
-class HowToPlay(ModalView):
-    close_bttn = ObjectProperty()
+from core.screens.Popups import GameWinView, GameLoseView, HowToPlay
 
 
 class PlayScreen(Screen):
@@ -95,11 +75,9 @@ class PlayScreen(Screen):
 
         # win and lose level animations widgets (Popups by now)
         self.lose_popup = GameLoseView()
-        self.lose_popup.color = [0] * 4
         self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level, re_load=True))
 
         self.win_popup = GameWinView()
-        self.win_popup.color = [0] * 4
         self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
 
         self.how_to_play_popup = HowToPlay()
@@ -187,7 +165,6 @@ class PlayScreen(Screen):
         if cols < 2:
             raise Exception("The board must have at least 2x2 cells")
 
-
         self.points = 0
         self.time_sec = level.time_seg
         self.cell_selected, self.second_cell_selected = None, None
@@ -195,6 +172,8 @@ class PlayScreen(Screen):
         self.board_widget.clear_widgets()
 
         self.board = [[] for _ in xrange(cols)]
+        self.lose_popup.board = self.board
+        self.win_popup.board = self.board
 
         for i in xrange(cols):
             for j in xrange(cols):
@@ -207,7 +186,7 @@ class PlayScreen(Screen):
                 board_cell.bind(on_press=self.cell_pressed)
 
         if not re_load:
-            self.randomized_positions = [[random.randint(0, cols - 1) for _ in range(4)] for _ in xrange(cols * cols)]
+            self.randomized_positions = [[random.randint(0, cols - 1) for _ in range(cols)] for _ in xrange(cols * cols)]
 
         # randomize the level with cols^2 changes
         for r in self.randomized_positions:
@@ -342,6 +321,8 @@ class PlayScreen(Screen):
         self.time_lbl.opacity = 1
         self.game_paused = False
 
+        self.lose_popup.open()
+
     def on_leave(self, *args):
         self.pause()
 
@@ -463,20 +444,7 @@ class PlayScreen(Screen):
         # always return true to keep alive the timer
         return True
 
-    def display_settings(self):
-        """
-        Method that display settings on the screen
-        :return:
-        """
-        self.pause()
-
-        App.get_running_app().open_settings()
-
     def display_how_to_play(self):
-        """
-        Method that display settings on the screen
-        :return:
-        """
         self.pause()
 
         self.how_to_play_popup.open()
