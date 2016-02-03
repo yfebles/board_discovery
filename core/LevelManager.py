@@ -47,13 +47,7 @@ class LevelManager:
             level supplied
             :return:
             """
-            try:
-
-                self.db.add(Statistics(level=level, points=points))
-                self.db.commit()
-
-            except Exception as ex:
-                print(ex.message)
+            pass
 
     __instance = None
 

@@ -64,24 +64,25 @@
 <Transparent@Widget>:
     background_color: [0] *4
 
-<FunctionButton@Button+Transparent>:
+<FunctionButton@Button>:
     font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
     markup: True
     user_text: ""
-    text: "[color=#96875a]" + self.user_text + "[/color]"
+    text: self.user_text # "[color=#96875a]" + self.user_text + "[/color]"
+    background_color: [0] * 4
 
-    image_back: "function_btn_border.png"
-    image_back_pressed: "function_btn_border.png"
     pressed: False
+    image_back: "function_btn_border.png"
 
     canvas.before:
         Rectangle:
-            source: os.path.join("assets","images","app_graphics", self.image_back if not self.pressed else self.image_back_pressed)
+            source: os.path.join("assets","images","app_graphics", self.image_back if not self.pressed else "function_btn_border_pressed.png")
             pos: self.pos[0] + self.size[0] / 2.0 - min(self.size[0], self.size[1]) / 2.0 , self.pos[1] + self.size[1] / 2.0 - min(self.size[0], self.size[1]) / 2.0
             size: min(self.size[0], self.size[1]), min(self.size[0], self.size[1])
 
     on_touch_down: app.sounds.play_click_sound()
-    on_touch_up: self.pressed = False
+    on_touch_up: self.pressed=False
+
 
 <ShadowLabel>:
     decal: 2, -2

@@ -65,7 +65,7 @@ class BoardCell(Button, EventDispatcher):
             return
 
         if self.locked:
-            raise Exception("Invalid operation on lock")
+            return
 
         self._visible = value
 

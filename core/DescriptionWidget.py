@@ -126,7 +126,6 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         self.remove_widget(self.descp_widget)
 
         self.name_widget.opacity = 1
-
         self.detail_descp_name.name = ""
         self.detail_descp_label.text = ""
         self.detail_descp_name.button_text = ""

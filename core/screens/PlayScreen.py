@@ -12,9 +12,10 @@ from core.Utils import *
 from core.Sounds import Sounds
 from core.db.db_orm import DB
 from core.BoardCell import BoardCell
+from kivy.uix.bubble import Bubble
 from core.LevelManager import LevelManager
 from core.DescriptionWidget import DescriptionWidget
-from core.screens.Popups import GameWinView, GameLoseView, HowToPlay
+from core.screens.Popups import GameFinishView, HowToPlay
 
 
 class PlayScreen(Screen):
@@ -26,6 +27,7 @@ class PlayScreen(Screen):
     # region WIDGETS
 
     board_widget = ObjectProperty()
+    toast_widget = ObjectProperty()
     points_lbl = ObjectProperty()
     hints_lbl = ObjectProperty()
     help_button = ObjectProperty()
@@ -74,20 +76,28 @@ class PlayScreen(Screen):
         self.randomized_positions = []
 
         # win and lose level animations widgets (Popups by now)
-        self.lose_popup = GameLoseView()
-        self.lose_popup.repeat_level_bttn.bind(on_press=lambda obj: self.load_level(self.current_level, re_load=True))
+        self.game_finish_view = GameFinishView()
 
-        self.win_popup = GameWinView()
-        self.win_popup.continue_playing_bttn.bind(on_press=self.save_and_continue)
+        # friend classes behavior
+        self.game_finish_view.play_screen = self
 
         self.how_to_play_popup = HowToPlay()
 
-        # self.lose_popup.color = [0] * 4
         self.how_to_play_popup.close_bttn.bind(on_press=lambda obj: self.play() if not self.is_descp_visible() else None)
 
         Clock.schedule_interval(self.update_time, timeout=1)
 
     # region Properties
+
+    @property
+    def game_wined(self):
+        """
+        prop that says if the game if wined or loosed according to the visibility of their cells
+        (all --> wined, loosed otherwise)
+        :return:
+        """
+        # the game is wined if all the cells are visible
+        return all([self.board[i][j].visible for i in xrange(self.columns) for j in xrange(self.columns)])
 
     @property
     def columns(self):
@@ -143,7 +153,7 @@ class PlayScreen(Screen):
 
     # region Level Handling
 
-    def save_and_continue(self, obj):
+    def save_and_continue(self, obj=None):
         """
         save the data of the current level of play. Unlock the next levels
         and load the next one
@@ -153,13 +163,16 @@ class PlayScreen(Screen):
 
         self.load_next_level()
 
-    def load_level(self, level, re_load=False):
+    def reload_level(self):
+        self.load_level(self.current_level, True)
+
+    def load_level(self, level=None, re_load=False):
         """
         Load into the play screen the data of the level supplied
         :param level: the level supplied (if any) else try to load the next
         un played level
         """
-        self.current_level = level
+        self.current_level = self.current_level if re_load else level
 
         cols = self.columns
         if cols < 2:
@@ -172,8 +185,6 @@ class PlayScreen(Screen):
         self.board_widget.clear_widgets()
 
         self.board = [[] for _ in xrange(cols)]
-        self.lose_popup.board = self.board
-        self.win_popup.board = self.board
 
         for i in xrange(cols):
             for j in xrange(cols):
@@ -185,19 +196,29 @@ class PlayScreen(Screen):
                 self.board_widget.add_widget(board_cell)
                 board_cell.bind(on_press=self.cell_pressed)
 
+        self._randomize_board(re_load)
+
+        self.update_cells_positions()
+        self.hide_descp_widget()
+        self.play()
+
+    def _randomize_board(self, re_load):
+        """
+        Randomize the items on the board
+        :param re_load: True if re use the previous randomization for the level
+        :return:
+        """
+        cols = self.columns
+
         if not re_load:
             self.randomized_positions = [[random.randint(0, cols - 1) for _ in range(cols)] for _ in xrange(cols * cols)]
 
-        # randomize the level with cols^2 changes
+        # randomize the level with cols^2 changes or load the previous order if reload level
         for r in self.randomized_positions:
 
             temp = self.board[r[0]][r[1]]
             self.board[r[0]][r[1]] = self.board[r[2]][r[3]]
             self.board[r[2]][r[3]] = temp
-
-        self.update_cells_positions()
-        self.hide_descp_widget()
-        self.play()
 
     def update_cells_positions(self):
         cols = self.columns
@@ -223,7 +244,7 @@ class PlayScreen(Screen):
 
         if next_level is None:
             # self.clear_widgets()
-            Clock.schedule_once(self.win_popup.open, timeout=0.5)
+            Clock.schedule_once(self.game_finish_view.open, timeout=0.5)
 
         self.load_level(next_level)
 
@@ -237,17 +258,12 @@ class PlayScreen(Screen):
         If game has been wined or lose raise the events accordingly
         :return:
         """
-        # the game is wined if all the cells are visible
 
-        all_visible = all([self.board[i][j].visible
-                           for i in xrange(self.columns)
-                           for j in xrange(self.columns)])
-
-        if all_visible:
+        if self.game_wined:
             # game win animation
             self.pause()
 
-            Clock.schedule_once(self.win_popup.open, timeout=1)
+            Clock.schedule_once(self.game_finish_view.open, timeout=1)
 
     def cell_pressed(self, board_cell):
         if board_cell.visible:
@@ -284,8 +300,8 @@ class PlayScreen(Screen):
         pos, w, h = cell_selected.pos, cell_selected.width, cell_selected.height
         pos1, w1, h1 = board_cell.pos, board_cell.width, board_cell.height
 
-        Clock.schedule_once(lambda obj: self.create_points_effect(pos, w, h), 0.1)
-        Clock.schedule_once(lambda obj: self.create_points_effect(pos1, w1, h1), 0.3)
+        Clock.schedule_once(lambda obj: self.create_points_effect(pos, w, h, self.current_level.points), 0.1)
+        Clock.schedule_once(lambda obj: self.create_points_effect(pos1, w1, h1, self.current_level.points), 0.3)
 
         # check if the game has been wined
         self.check_game_state()
@@ -321,8 +337,6 @@ class PlayScreen(Screen):
         self.time_lbl.opacity = 1
         self.game_paused = False
 
-        self.lose_popup.open()
-
     def on_leave(self, *args):
         self.pause()
 
@@ -340,9 +354,6 @@ class PlayScreen(Screen):
 
     def is_descp_visible(self):
         return self.description_widget in self.board_widget.children
-
-    def help_button_pressed(self, bttn=None):
-        pass
 
     def show_descp_widget(self, pos, board_cell):
         """
@@ -386,8 +397,19 @@ class PlayScreen(Screen):
         function = lambda obj: self.board_widget.remove_widget(widget)
         Clock.schedule_once(function, timeout=time)
 
-    def create_points_effect(self, pos, width, height):
-        self.points += self.current_level.points
+    def create_points_effect(self, pos, width, height, points_change=0, duration=1):
+        """
+        Display a text with animation inside of the rectangle with left bottom corner at pos
+        and the dimension supplied of width, height.
+
+        :param pos: The pos of the text message
+        :param width:
+        :param height:
+        :param points_change: The amount of points that are modified (sum or rest) by this action
+        :param duration: The duration in seconds of the animation
+        :return:
+        """
+        self.points += points_change
 
         animation_type = random.random()
 
@@ -395,8 +417,9 @@ class PlayScreen(Screen):
 
         x_orig, y_orig = pos[0] - self.board_widget.width / 2.0, pos[1] - self.board_widget.height / 2.0
 
-        anim = Animation(opacity=0)
-        anim &= Animation(font_size=lbl.font_size * 1.5)
+        anim = Animation(opacity=0) & Animation(font_size=lbl.font_size * 1.5)
+
+        # region Animation Types
 
         if animation_type < 0.3:
             # from the bottom center to right upper corner
@@ -413,6 +436,8 @@ class PlayScreen(Screen):
             x_end = x_orig
             x_orig += width
 
+        # endregion
+
         y_end = y_orig + height
 
         lbl.pos = x_orig, y_orig
@@ -421,7 +446,7 @@ class PlayScreen(Screen):
         anim.start(lbl)
 
         self.board_widget.add_widget(lbl)
-        self.remove_widget_later(lbl)
+        self.remove_widget_later(lbl, duration)
 
     # endregion
 
@@ -437,15 +462,34 @@ class PlayScreen(Screen):
             self.pause()
 
             # game lose animation
-            Clock.schedule_once(self.lose_popup.open, timeout=0.5)
+            Clock.schedule_once(self.game_finish_view.open, timeout=0.5)
 
         self.time_sec = current_time
 
         # always return true to keep alive the timer
         return True
 
-    def display_how_to_play(self):
+    def display_how_to_play(self, obj=None):
         self.pause()
 
         self.how_to_play_popup.open()
+
+    def display_balloon(self, text, pos, time=3):
+        """
+        Display a balloon widget with text to help the user or
+        give him some text message
+        :param text:
+        :return:
+        """
+
+        self.toast_widget.opacity = 1
+        self.toast_widget.width = 100
+        self.toast_widget.height = 100
+
+        self.toast_widget.pos = self.board_widget.pos
+
+        anim = Animation(opacity=0)
+
+        Clock.schedule_once(lambda dt: anim.start(self.toast_widget), timeout=time)
+
 
