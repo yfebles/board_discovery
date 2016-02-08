@@ -7,10 +7,11 @@ from kivy.properties import ObjectProperty, Clock
 
 
 class ModalViewBD(ModalView):
-    pass
+    def start_animations(self):
+        pass
 
 
-class HowToPlay(ModalView):
+class HowToPlay(ModalViewBD):
     close_bttn = ObjectProperty()
 
 
@@ -125,11 +126,13 @@ class GameFinishView(ModalViewBD):
         self.action_bttn.opacity = 0
         self.action_bttn.pos = self.pos[0] + self.width, self.pos[1] + self.height * 0.025
 
+        # reset time box
         self.time_box.opacity = 0
         self.time_box.width = self.width * 0.5
         self.time_box.height = self.height * 0.1
         self.time_box.pos = self.pos[0] + self.width, self.pos[1] + self.height * 0.075
 
+        # reset points box
         self.points_box.opacity = 0
         self.points_box.width = self.width * 0.5
         self.points_box.height = self.height * 0.1

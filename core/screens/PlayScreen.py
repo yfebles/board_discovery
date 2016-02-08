@@ -491,5 +491,3 @@ class PlayScreen(Screen):
         anim = Animation(opacity=0)
 
         Clock.schedule_once(lambda dt: anim.start(self.toast_widget), timeout=time)
-
-

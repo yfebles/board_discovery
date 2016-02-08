@@ -15,17 +15,8 @@ class ShadowLabel(Label):
     decal = ListProperty([0, 0])
     tint = ListProperty([1, 1, 1, 1])
 
-
 class ColoredLabel(Label):
-
-    def __init__(self, **kwargs):
-        Label.__init__(self, **kwargs)
-
-        self.transparency = 0.5
-
-        self.canvas.before.add(Color(rgba=[0, 0, 0, self.transparency]))
-        self.canvas.before.add(Rectangle(pos=self.pos, size=self.size))
-
+    pass
 
 class DescriptionName(BoxLayout):
 
@@ -43,7 +34,6 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
 
     # region CONSTANTS
 
-    name_widget = ObjectProperty()
     close_bttn = ObjectProperty()
     descp_widget = ObjectProperty()
 
@@ -55,26 +45,12 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         FloatLayout.__init__(self, **kwargs)
         super(EventDispatcher, self).__init__(**kwargs)
 
-        self.descp = ""
         self.old_pos = self.pos
-
         self.register_event_type("on_hide")
 
-        self.descp_widget = BoxLayout()
-        self.descp_widget.orientation = "vertical"
-
-        self.detail_descp_name = DescriptionName()
-        self.detail_descp_name.transparency = 0.5
-        self.detail_descp_name.size_hint = [1, 0.15]
-        self.detail_descp_label = ColoredLabel()
-
         self.hide_descp_update()
-        self.descp_widget.size_hint = [0.95, 0.001]
 
-        self.descp_widget.add_widget(self.detail_descp_name)
-        self.descp_widget.add_widget(self.detail_descp_label)
-
-        self.detail_descp_name.button_callback = self.hide_descp
+        self.descp_widget.button_callback = self.hide_descp
 
         # animations
         show_transition = AnimationTransition.out_bounce
@@ -84,67 +60,44 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         self.hide_desp_animation = Animation(size_hint_y=0, duration=self.DESCP_SHOW_DELAY_TIME, transition=hide_transition)
         self.hide_desp_animation.bind(on_complete=self.hide_descp_update)
 
-    # region visual effects
-
-    def _font_color_change(self, touch_down):
-        """
-        change of the font color on touch
-        :return:
-        """
-        pass
-
-    # endregion
-
     def setPos(self, pos):
+        self.old_pos = self.pos
         self.pos = pos
-        self.old_pos = pos
 
     def is_descp_visible(self):
-        return self.descp_widget in self.children
+        # if has some height
+        return self.descp_widget.descp_item.size_hint[1] > 0.01
+
+    def hide_descp_update(self, obj=None, bttn=None):
+        self.descp_widget.button_text = ""
 
     def show_descp(self):
-        if not self.is_descp_visible():
-            self.show_descp_update()
-            self.show_desp_animation.start(self.descp_widget)
-            self.name_widget.opacity = 0
-            self.close_bttn.opacity = 0
+        if self.is_descp_visible():
+            return
+
+        self.close_bttn.opacity = 0
+        self.descp_widget.button_text = ""
+        self.show_desp_animation.start(self.descp_widget.descp_item)
 
     def hide_descp(self, with_animation=True):
         if not self.is_descp_visible():
             return
 
         if with_animation:
-            self.hide_desp_animation.start(self.descp_widget)
+            self.hide_desp_animation.start(self.descp_widget.descp_item)
         else:
-            self.descp_widget.size_hint_y = 0
+            self.descp_widget.descp_item.size_hint_y = 0
             self.hide_descp_update()
-            self.name_widget.opacity = 1
 
         self.close_bttn.opacity = 1
 
-    def hide_descp_update(self, obj=None, button=None):
-        self.remove_widget(self.descp_widget)
-
-        self.name_widget.opacity = 1
-        self.detail_descp_name.name = ""
-        self.detail_descp_label.text = ""
-        self.detail_descp_name.button_text = ""
-
-    def show_descp_update(self, obj=None):
-        self.descp_widget.pos = self.pos[0] + self.width * 0.025, self.pos[1] + self.height * 0.025
-        self.detail_descp_name.name = self.name_widget.name
-        self.detail_descp_name.button_text = ""
-        self.detail_descp_label.text = self.descp
-        self.add_widget(self.descp_widget)
-
     def update(self, board_cell):
-        self.descp = board_cell.description
         self.image = board_cell.image
-        self.name_widget.name = board_cell.name
+        self.descp_widget.name = board_cell.name
+        self.descp_widget.descp = board_cell.description
 
     def dispatch_hide(self):
         self.hide_descp(False)
-
         self.dispatch("on_hide")
 
     def on_hide(self):

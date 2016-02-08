@@ -176,59 +176,63 @@
         text: "[color=#76643a]" + str(root.items_count) + " levels[/color]"
 
 
-<ColoredLabel@Label>:
-    id: colored_label
-
-    transparency: 0.5
-    canvas.before:
-        Color:
-            rgba: [0,0,0, colored_label.transparency]
-
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
 <DescriptionName@BoxLayout>:
     id: descp_name
-    orientation: "horizontal"
+    name_widget:name_widget_id
+    descp_item: item_descp_id
+    orientation: "vertical"
+
+    # the descp text of the item
+    descp: " "
+    opacity: 0.5
+
+    # the name of the item
     name: "Android"
+
     button_text: ""
     button_callback: None
-    transparency: 0.0
 
     canvas.before:
-        Color:
-            rgba: [0,0,0, descp_name.transparency]
-
         Rectangle:
+            source: os.path.join("assets","images","app_graphics", "back_item_cell.png")
             pos: self.pos
             size: self.size
 
+    BoxLayout:
+        id: name_widget_id
+        orientation: 'horizontal'
+
+        CenteredLabel:
+            id:item_name_lbl_id
+            size_hint: [0.8, 1]
+            font_name: os.path.join("assets","fonts","roboto_black.ttf")
+            text: descp_name.name
+            font_size: min(self.height * 0.8 ,self.width * 0.08)
+
+        Button:
+            id: open_descp_bttn
+            size_hint: [0.2, 1]
+            background_color: [0] * 4
+            font_size: self.height * 0.4
+            markup: True
+            font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+
+            text: "[color=#ffa200] " + descp_name.button_text + " [/color]"
+            font_size: self.width * 0.5
+            on_press: descp_name.button_callback() if descp_name.button_callback is not None else None
+
     CenteredLabel:
-        id:item_name_lbl_id
-        size_hint: [0.8, 1]
+        id: item_descp_id
         font_name: os.path.join("assets","fonts","roboto_black.ttf")
-        text: descp_name.name
+        text: descp_name.descp
         font_size: min(self.height * 0.8 ,self.width * 0.08)
-
-    Button:
-        id: open_descp_bttn
-        size_hint: [0.2, 1]
-        background_color: [0] * 4
-        font_size: self.height * 0.4
-        markup: True
-        font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
-
-        text: "[color=#ffa200] " + descp_name.button_text + " [/color]"
-        font_size: self.width * 0.5
-        on_press: descp_name.button_callback() if descp_name.button_callback is not None else None
 
 <DescriptionWidget@FloatLayout>:
 
     id:description_widget
     image:  os.path.join("assets", "images", "items", "android.jpg")
     close_bttn: bttn_close
-    name_widget: item_name
+    descp_widget: item_name
 
     canvas.before:
         Rectangle:
@@ -262,10 +266,12 @@
 
     DescriptionName:
         id: item_name
+
         size_hint: [0.95, 0.15]
         transparency: 0.7
         pos: description_widget.pos[0] + description_widget.width * 0.025, description_widget.pos[1] + description_widget.height * 0.025
         name: " "
+        descp: " "
         button_text: ""
         button_callback: description_widget.show_descp
 
