@@ -323,6 +323,8 @@ class PlayScreen(Screen):
         action = self.play if self.game_paused else self.pause
         action()
 
+        self.game_finish_view.open()
+
     def pause(self, dt=None):
         self.game_paused = True
         self.pause_animation.start(self.time_lbl)

@@ -7,19 +7,6 @@
     on_open: self.start_animations()
     background: os.path.join("assets","images","app_graphics", "menu_back.jpg")
 
-<ActionButton@Button>:
-    background_color: [0] * 4
-    image_back: "display_color_time_box4.png"
-    canvas.before:
-        Rectangle:
-            source: os.path.join("assets","images","app_graphics", self.image_back)
-            pos:self.pos
-            size:self.size
-
-    user_text: " "
-    markup: True
-    text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "] " + self.user_text + " [/size]"
-
 
 <GameFinishView@ModalViewBD>:
     action_bttn: action_bttn_id
@@ -30,7 +17,7 @@
     time_box: time_box_id
     time_label: time_label_id
 
-    points_label: display_points
+    points_label: points_label_id
     points_box:display_points
 
     size_hint: [0.9, 0.9]
@@ -59,28 +46,29 @@
 
         # other animations from x [0.15, 0.85] and y [0.15, 0.85]
 
-        ActionButton:
+        RoundedButton:
             id: action_bttn_id
             opacity: 0
             pos: root.pos[0] + root.width, root.pos[1] + root.height * 0.025
             size_hint: [0.5, 0.1]
-            on_press: root.dismiss()
+            user_text: " "
+            text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "] " + self.user_text + " [/size]"
+            on_press: self.pressed, _ = not self.pressed, root.dismiss
 
         DisplayBoxHorizontal:
             id: time_box_id
             back_color_img: "display_color_time_box4.png"
             shine_shadow_img: "display_int_shadow.png"
-
             opacity: 0
-            pos: root.pos[0] + root.width, root.pos[1] + root.height * 0.025
-            size_hint: [0.5, 0.1]
+
+            size_hint: [0.5, 0.15]
 
             Label:
                 id: time_label_id
                 size_hint:[0.9,1]
                 halign: 'center'
                 text: "00:00"
-                font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+#                font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
                 background_color: [1] * 4
                 font_size: min(self.width / 4, self.height) * 0.7
 
@@ -88,9 +76,11 @@
             id: display_points
             back_color_img: "display_color_money.png"
             shine_shadow_img: "display_shine_shadow_money.png"
-            size_hint: [0.5, 1]
             padding: [0,self.height/20  ,0, self.height/20]
             opacity: 0
+
+            size_hint: [0.5, 0.15]
+
 
             Label:
                 font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")

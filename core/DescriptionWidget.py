@@ -61,23 +61,29 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         self.hide_desp_animation.bind(on_complete=self.hide_descp_update)
 
     def setPos(self, pos):
+        """
+        Old pos variable stored for use in animations outside the widget (recheck)
+        :param pos:
+        :return:
+        """
         self.old_pos = self.pos
         self.pos = pos
 
     def is_descp_visible(self):
         # if has some height
-        return self.descp_widget.descp_item.size_hint[1] > 0.01
+        return self.descp_widget.size_hint[1] > 0.15
 
     def hide_descp_update(self, obj=None, bttn=None):
         self.descp_widget.button_text = ""
+        self.close_bttn.opacity = 1
 
     def show_descp(self):
         if self.is_descp_visible():
             return
 
         self.close_bttn.opacity = 0
-        self.descp_widget.button_text = ""
-        self.show_desp_animation.start(self.descp_widget.descp_item)
+        self.descp_widget.button_text = ""
+        self.show_desp_animation.start(self.descp_widget)
 
     def hide_descp(self, with_animation=True):
         if not self.is_descp_visible():
@@ -86,7 +92,7 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         if with_animation:
             self.hide_desp_animation.start(self.descp_widget.descp_item)
         else:
-            self.descp_widget.descp_item.size_hint_y = 0
+            self.descp_widget.size_hint_y = 15
             self.hide_descp_update()
 
         self.close_bttn.opacity = 1

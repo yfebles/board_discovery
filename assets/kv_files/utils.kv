@@ -31,7 +31,7 @@
     halign: 'center'
 
 
-<BackToMenuButton@RoundedButton>:
+<BackToButton@RoundedButton>:
     text: 'Menu'
     on_press: app.screen_manager.current = 'menu'
 
@@ -184,7 +184,6 @@
 
     # the descp text of the item
     descp: " "
-    opacity: 0.5
 
     # the name of the item
     name: "Android"
@@ -193,6 +192,9 @@
     button_callback: None
 
     canvas.before:
+        Color:
+            rgba: [0,0,0,0.7]
+
         Rectangle:
             source: os.path.join("assets","images","app_graphics", "back_item_cell.png")
             pos: self.pos
@@ -267,8 +269,7 @@
     DescriptionName:
         id: item_name
 
-        size_hint: [0.95, 0.15]
-        transparency: 0.7
+        size_hint: [0.95, 0.35]
         pos: description_widget.pos[0] + description_widget.width * 0.025, description_widget.pos[1] + description_widget.height * 0.025
         name: " "
         descp: " "
