@@ -70,6 +70,7 @@ class PlayScreen(Screen):
         self.effects, self.first_run, self.game_paused = [True] * 3
 
         self.board = []
+        self.hide_descp_pos = 0,0
         self.cell_selected, self.second_cell_selected, self.current_level = [None] * 3
 
         # list with the randomized operations of the last loaded level
@@ -267,7 +268,7 @@ class PlayScreen(Screen):
 
     def cell_pressed(self, board_cell):
         if board_cell.visible:
-            self.show_descp_widget(board_cell.center, board_cell)
+            self.show_descp_widget(board_cell)
             return
 
         if board_cell.locked or self.game_paused or self.current_level is None or self.is_descp_visible():
@@ -323,8 +324,6 @@ class PlayScreen(Screen):
         action = self.play if self.game_paused else self.pause
         action()
 
-        self.game_finish_view.open()
-
     def pause(self, dt=None):
         self.game_paused = True
         self.pause_animation.start(self.time_lbl)
@@ -357,15 +356,18 @@ class PlayScreen(Screen):
     def is_descp_visible(self):
         return self.description_widget in self.board_widget.children
 
-    def show_descp_widget(self, pos, board_cell):
+    def show_descp_widget(self, board_cell):
         """
         Shows the descp widget on the position supplied
         :param pos: tuple of pos_x, pos_y
         :return:
         """
         if not self.is_descp_visible():
+
+            self.hide_descp_pos = board_cell.center
+            self.description_widget.pos = board_cell.center
+
             self.description_widget.update(board_cell)
-            self.description_widget.setPos(pos)
             self.board_widget.add_widget(self.description_widget)
 
             # stop the game timer when the description is visible
@@ -382,7 +384,7 @@ class PlayScreen(Screen):
             # start the game timer when the description is hide
             Clock.schedule_once(self.play, timeout=self.DESCP_SHOW_DELAY_TIME * 1.1)
 
-            pos = self.description_widget.old_pos
+            pos = self.hide_descp_pos
             hide_animation = Animation(x=pos[0], y=pos[1], duration=self.DESCP_SHOW_DELAY_TIME)
             hide_animation &= self.hide_descp_animation
             hide_animation.start(self.description_widget)

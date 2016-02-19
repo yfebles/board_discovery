@@ -53,7 +53,7 @@
             size_hint: [0.5, 0.1]
             user_text: " "
             text: "[size="+ str(min(int(self.height * 0.6), int(self.width / 8.0 ))) + "] " + self.user_text + " [/size]"
-            on_press: self.pressed, _ = not self.pressed, root.dismiss
+            on_press: self.pressed, _ = not self.pressed, root.dismiss()
 
         DisplayBoxHorizontal:
             id: time_box_id

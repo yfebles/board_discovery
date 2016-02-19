@@ -45,37 +45,23 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         FloatLayout.__init__(self, **kwargs)
         super(EventDispatcher, self).__init__(**kwargs)
 
-        self.old_pos = self.pos
         self.register_event_type("on_hide")
 
-        self.hide_descp_update()
-
-        self.descp_widget.button_callback = self.hide_descp
+        self.descp_widget.button_callback = self.show_descp
 
         # animations
         show_transition = AnimationTransition.out_bounce
         hide_transition = AnimationTransition.out_bounce
 
-        self.show_desp_animation = Animation(size_hint_y=0.95, duration=self.DESCP_SHOW_DELAY_TIME, transition=show_transition)
+        self.show_desp_animation = Animation(size_hint_y=0.85, duration=self.DESCP_SHOW_DELAY_TIME, transition=show_transition)
         self.hide_desp_animation = Animation(size_hint_y=0, duration=self.DESCP_SHOW_DELAY_TIME, transition=hide_transition)
-        self.hide_desp_animation.bind(on_complete=self.hide_descp_update)
 
-    def setPos(self, pos):
-        """
-        Old pos variable stored for use in animations outside the widget (recheck)
-        :param pos:
-        :return:
-        """
-        self.old_pos = self.pos
-        self.pos = pos
+        self.show_desp_container_anim = Animation(size_hint_y=0.95, duration=self.DESCP_SHOW_DELAY_TIME, transition=show_transition)
+        self.hide_desp_container_anim = Animation(size_hint_y=0.15, duration=self.DESCP_SHOW_DELAY_TIME, transition=hide_transition)
 
     def is_descp_visible(self):
         # if has some height
-        return self.descp_widget.size_hint[1] > 0.15
-
-    def hide_descp_update(self, obj=None, bttn=None):
-        self.descp_widget.button_text = ""
-        self.close_bttn.opacity = 1
+        return self.descp_widget.descp_item.size_hint[1] > 0.15
 
     def show_descp(self):
         if self.is_descp_visible():
@@ -83,18 +69,32 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
 
         self.close_bttn.opacity = 0
         self.descp_widget.button_text = ""
-        self.show_desp_animation.start(self.descp_widget)
+        self.descp_widget.button_callback = self.hide_descp
+
+        # open the description label
+        self.show_desp_animation.start(self.descp_widget.descp_item)
+        self.hide_desp_container_anim.start(self.descp_widget.name_widget)
+
+        # open the description container
+        self.show_desp_container_anim.start(self.descp_widget)
 
     def hide_descp(self, with_animation=True):
         if not self.is_descp_visible():
             return
 
         if with_animation:
+            # hide the description label
             self.hide_desp_animation.start(self.descp_widget.descp_item)
-        else:
-            self.descp_widget.size_hint_y = 15
-            self.hide_descp_update()
+            self.show_desp_container_anim.start(self.descp_widget.name_widget)
 
+            # hide the description container
+            self.hide_desp_container_anim.start(self.descp_widget)
+
+        else:
+            self.descp_widget.descp_item.size_hint_y = 15
+
+        self.descp_widget.button_callback = self.show_descp
+        self.descp_widget.button_text = ""
         self.close_bttn.opacity = 1
 
     def update(self, board_cell):
@@ -113,4 +113,3 @@ class DescriptionWidget(FloatLayout, EventDispatcher):
         :return:
         """
         pass
-

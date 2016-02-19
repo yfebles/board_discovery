@@ -2,10 +2,10 @@
 import os
 import random
 from kivy.uix.label import Label
+from core.Utils import WellDoneLabel
 from kivy.uix.modalview import ModalView
 from kivy.animation import Animation, AnimationTransition
 from kivy.properties import ObjectProperty, Clock
-from core.Utils import WellDoneLabel
 
 
 class ModalViewBD(ModalView):
@@ -154,6 +154,32 @@ class GameFinishView(ModalViewBD):
 
         Clock.schedule_once(self.start_time_animation,  timeout=(n * row_animation_duration))
 
+    def add_points_anim_handler(self, dt):
+        """
+
+        :param dt:
+        :return:
+        """
+        if self.time_sec <= 0:
+            Clock.schedule_once(self.show_performance_text_anim,  timeout=0.2)
+            return
+
+        self.time_sec -= 1
+
+        self.points += self.play_screen.current_level.points
+
+        w = random.randint(int(self.board_widget.width * 0.05), int(self.board_widget.width * 0.15))
+
+        x = self.board_widget.pos[0] + random.randint(0, int(self.board_widget.width * 0.5))
+        y = self.board_widget.pos[1] + random.randint(0, int(self.board_widget.height * 0.5))
+
+        self.create_points_effect((x, y), w, w)
+
+        # todo check speed
+        new_dt = 0.3 if dt > 0.5 else dt * 0.9
+
+        Clock.schedule_once(self.add_points_anim_handler,  timeout=new_dt)
+
     def start_time_animation(self, obj=None):
         """
         method that continue the animations with the time and points effects
@@ -178,6 +204,28 @@ class GameFinishView(ModalViewBD):
 
         Clock.schedule_once(self.add_points_anim_handler, timeout=1)
 
+    def show_performance_text_anim(self, obj=None):
+        """
+        method that shows a text animation for the user result based on the points earned
+        :param obj:
+        :return:
+        """
+
+        Clock.schedule_once(self.continue_button_animation,  timeout=0.5)
+
+    def continue_button_animation(self, obj=None):
+        """
+        Animation that shows the button of continue action to the user
+        :param obj:
+        :return:
+        """
+        x_end = self.pos[0] + self.width * 0.25
+
+        anim = Animation(x=x_end, transition=AnimationTransition.out_bounce, duration=1)
+        anim &= Animation(opacity=1)
+
+        anim.start(self.action_bttn)
+
     def create_points_effect(self, pos, width, height, points_change=0, duration=1):
         """
         Display a text with animation inside of the rectangle with left bottom corner at pos
@@ -192,7 +240,7 @@ class GameFinishView(ModalViewBD):
         """
         animation_type = random.random()
 
-        lbl = WellDoneLabel(text=str(self.play_screen.current_level.points), pos=self.board_widget.pos)
+        lbl = WellDoneLabel(text=str(self.play_screen.current_level.points))
 
         x_orig, y_orig = pos[0], pos[1]
 
@@ -226,54 +274,6 @@ class GameFinishView(ModalViewBD):
 
         self.board_widget.add_widget(lbl)
         self.remove_widget_later(lbl, duration)
-
-    def add_points_anim_handler(self, dt):
-        """
-
-        :param dt:
-        :return:
-        """
-        if self.time_sec <= 0:
-            Clock.schedule_once(self.show_performance_text_anim,  timeout=0.2)
-            return
-
-        self.time_sec -= 1
-
-        self.points += self.play_screen.current_level.points
-
-        w = random.randint(int(self.board_widget.width * 0.05), int(self.board_widget.width * 0.15))
-
-        x = random.randint(int(self.board_widget.pos[0]), int(self.board_widget.pos[0] + self.board_widget.width))
-        y = random.randint(int(self.board_widget.pos[1]), int(self.board_widget.pos[1] + self.board_widget.height))
-
-        self.create_points_effect((x, y), w, w)
-
-        # todo check speed
-        new_dt = 0.3 if dt > 0.5 else dt * 0.9
-
-        Clock.schedule_once(self.add_points_anim_handler,  timeout=new_dt)
-
-    def show_performance_text_anim(self, obj=None):
-        """
-        method that shows a text animation for the user result based on the points earned
-        :param obj:
-        :return:
-        """
-
-        Clock.schedule_once(self.continue_button_animation,  timeout=0.5)
-
-    def continue_button_animation(self, obj=None):
-        """
-        Animation that shows the button of continue action to the user
-        :param obj:
-        :return:
-        """
-        x_end = self.pos[0] + self.width * 0.25
-
-        anim = Animation(x=x_end, transition=AnimationTransition.out_bounce, duration=1)
-        anim &= Animation(opacity=1)
-
-        anim.start(self.action_bttn)
 
     # endregion
 
