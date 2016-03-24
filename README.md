@@ -1,2 +1,2 @@
 # board_discovery
-A game with the idea of board discovery of  general item
+A kivy python game with the idea of a board discovery of general culture items
