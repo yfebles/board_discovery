@@ -1,0 +1,4 @@
+title= BoardDiscovery
+author= GiftyPlay
+orientation=portrait
+icon=ico.png

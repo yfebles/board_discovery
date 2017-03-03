@@ -1,0 +1,92 @@
+# -*- coding: utf-8 -*-
+#: import Clock kivy.properties.Clock
+
+<PresentationScreen>:
+    id: presentation_screen
+
+    back_image: "intro_back.jpg"
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", self.back_image)
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: self.height * 0.06
+        size_hint: [0.9, 0.9]
+        pos: presentation_screen.width * 0.05, presentation_screen.height * 0.05
+        halign: 'center'
+
+        Widget:
+            id: picture_widget
+            size_hint: [1, 0.5]
+
+            canvas.before:
+                Rectangle:
+                    source: os.path.join("assets","images","app_graphics", "game_logo.png")
+                    pos: self.pos
+                    size: self.size
+
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint: [1, 0.5]
+
+            Widget:
+                size_hint: [0.25, 1]
+
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: [0.5, 1]
+
+                RoundedButton:
+                    size_hint: [1, 0.2]
+                    font_name: "Ravie"
+                    text: "[color=#ffffff][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "]Jugar[/size][/color]"
+                    on_press: app.screen_manager.current, self.pressed = 'play', not self.pressed  # the lite version go straight to play no to menu
+
+                Widget:
+                    size_hint: [1, 0.3]
+
+                BoxLayout:
+                    size_hint: [1, 0.5]
+                    spacing: 0.2
+                    orientation: 'vertical'
+
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: self.width * 0.08
+
+                        RoundedButton:
+                            size_hint: [0.20, 0.5]
+                            image_back:  "fb.png"
+                            on_press:
+                            on_press: app.visit_fb_page()
+
+
+                        RoundedButton:
+                            size_hint: [0.20, 0.5]
+                            image_back: "twiter.png"
+                            on_press: app.visit_twitter_page()
+
+                        RoundedButton:
+                            size_hint: [0.20, 0.5]
+                            image_back: "google_play.png"
+
+                            on_press: app.visit_googleplay_page()
+
+                        Button:
+                            size_hint: [0.20, 0.5]
+                            background_color: [0] * 4
+                            pressed: False
+                            font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+                            font_size: min(self.width, self.height)
+                            text: ""
+                            on_press: self.font_size, _= min(self.width, self.height) * 1.4, Clock.schedule_once(app.open_settings, timeout=0.2)
+                            on_release: self.font_size = min(self.width, self.height)
+
+
+                    PresentationLabel:
+                        text: "[color=#dec07b]Board Discovery\n[/color] GiftyPlay"
+            Widget:
+                size_hint: [0.25, 1]

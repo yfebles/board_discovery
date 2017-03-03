@@ -1,0 +1,58 @@
+#:include assets\kv_files\utils.kv
+
+<AuthorScreen>:
+    id: author_screen
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "menu_back.png")
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: self.height * 0.06
+        size_hint: [0.9, 0.9]
+        pos: author_screen.width * 0.05, author_screen.height * 0.05
+        halign: 'center'
+
+        Widget:
+            size_hint: [1, 0.5]
+
+            canvas.before:
+                Rectangle:
+                    source: os.path.join("assets","images","app_graphics", "game_logo.png")
+                    pos: self.pos
+                    size: self.size
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint: [1, 0.5]
+
+            Widget:
+                size_hint: [0.25, 1]
+
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: [0.5, 1]
+
+                RoundedButton:
+                    size_hint: [1, 0.2]
+                    text: "[color=#e0ce8e][size="+ str(min(int(self.height * 0.6), int(self.width / 6.0 ))) + "][font=" + os.path.join("assets","fonts","fontawesome-webfont.ttf") + "] [/font] [font=" + os.path.join("assets","fonts","metamorphous-regular.ttf") + "] Menú[/font][/size][/color]"
+                    on_press: app.screen_manager.current = 'menu'
+
+                Widget:
+                    size_hint: [1, 0.3]
+
+                BoxLayout:
+                    size_hint: [1, 0.5]
+                    spacing: 0.2
+                    orientation: 'vertical'
+
+                    PresentationLabel:
+                        text: "GiftyGames® All rights reserved."
+
+                    PresentationLabel:
+                        text: "Get more games on: \n [ref=''][color=#dec07b]http://play.google.com/giftygames[/color][/ref]"
+                        on_ref_press: app.visit_gifty_games()
+            Widget:
+                size_hint: [0.25, 1]

@@ -1,0 +1,185 @@
+#:import os os
+#:import Image kivy.core.image.Image
+
+<RoundedButton@Button>:
+    background_color: [0] * 4
+    markup: True
+
+    pressed: False
+    image_back: "display_color_time_box4.png"
+    canvas.before:
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", self.image_back if not self.pressed else "display_color_time_box3.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "presentation_btn_shine.png")
+            pos: self.pos
+            size: self.size
+
+    on_touch_down: app.sounds.play_click_sound()
+    on_touch_up: self.pressed=False
+
+
+<RobotoLabel@Label>:
+    font_name: os.path.join("assets","fonts","roboto_ligth.ttf")
+
+<CenteredLabel@Label>:
+    valign: 'middle'
+    halign: 'center'
+
+
+<BackToButton@RoundedButton>:
+    text: 'Menu'
+    on_press: app.screen_manager.current = 'menu'
+
+# a label that adjust the text inside it
+<AdjustableLabel@Label>:
+    text_size: self.parent.width, None
+
+<DisplayBoxBase@BoxLayout>:
+    id: display_box
+    back_color_img: "None"
+    shine_shadow_img: "None"
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", display_box.back_color_img)
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", display_box.shine_shadow_img)
+            pos: self.pos
+            size: self.size
+
+<DisplayBox@DisplayBoxBase>:
+    orientation: 'vertical'
+
+<DisplayBoxHorizontal@DisplayBoxBase>:
+    orientation: 'horizontal'
+
+<Transparent@Widget>:
+    background_color: [0] *4
+
+<FunctionButton@Button>:
+    font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+    markup: True
+    user_text: ""
+    text: self.user_text # "[color=#96875a]" + self.user_text + "[/color]"
+    background_color: [0] * 4
+
+    pressed: False
+    image_back: "function_btn_border.png"
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", self.image_back if not self.pressed else "function_btn_border_pressed.png")
+            pos: self.pos[0] + self.size[0] / 2.0 - min(self.size[0], self.size[1]) / 2.0 , self.pos[1] + self.size[1] / 2.0 - min(self.size[0], self.size[1]) / 2.0
+            size: min(self.size[0], self.size[1]), min(self.size[0], self.size[1])
+
+    on_touch_down: app.sounds.play_click_sound()
+    on_touch_up: self.pressed=False
+
+
+<ShadowLabel>:
+    decal: 2, -2
+    tint: 0, 0, 0, 1
+
+    texture_path: os.path.join("assets","images","app_graphics", "almost_points_texture.jpg")
+
+    texture: Image(self.texture_path).texture
+
+    canvas.before:
+        Color:
+            rgba: root.tint   # shadow in black
+
+        Rectangle:
+            pos:
+                int(self.center_x - self.texture_size[0] / 2.) + root.decal[0],\
+                int(self.center_y - self.texture_size[1] / 2.) + root.decal[1]
+
+            size: root.texture_size
+            texture: root.texture
+
+        Color:
+            rgba: 1, 1, 1, 1
+
+<BoardCell@Label+Transparent>:
+
+    font_name: os.path.join("assets","fonts","fontawesome-webfont.ttf")
+    font_size: min(self.width, self.height) * 0.5
+    background_color:[0] * 4
+    markup:True
+    text: "[color=#727272][/color]"
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_border.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_color.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_int_shadow.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_shine.png")
+            pos: self.pos
+            size: self.size
+
+<LevelBoardCell@BoxLayout>:
+    orientation: 'vertical'
+
+    canvas.before:
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_border.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_color.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_int_shadow.png")
+            pos: self.pos
+            size: self.size
+
+        Rectangle:
+            source: os.path.join("assets","images","app_graphics", "board_btn_shine.png")
+            pos: self.pos
+            size: self.size
+
+    category_name: "Art"
+    items_count: 0
+
+    CenteredLabel:
+        size_hint: [1, 0.5]
+        markup: True
+        font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+        text: "[color=#96875a]" + root.category_name + "[/color]"
+
+    CenteredLabel:
+        size_hint: [1, 0.5]
+        markup: True
+        font_name: os.path.join("assets","fonts","metamorphous-regular.ttf")
+        text: "[color=#76643a]" + str(root.items_count) + " levels[/color]"
+
+
+
+
+<PresentationLabel@CenteredLabel+ShadowLabel>:
+    markup: True
+    font_size: min(self.width / 10, 20)
+
+
